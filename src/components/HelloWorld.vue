@@ -13,6 +13,37 @@
       <!-- Header Card -->
       <v-toolbar dark color="primary">
         <v-toolbar-title>Report</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn color="deep-orange" dark class="mb-2" v-if="token != ''" @click="logout">Log out</v-btn>
+        <v-dialog v-model="dialogLogin" max-width="500px" v-if="token === ''">
+          <template v-slot:activator="{ on }">
+            <v-btn color="deep-orange" dark class="mb-2" v-on="on">Login</v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+              <span class="headline">Login</span>
+            </v-card-title>
+
+            <v-card-text>
+              <v-container grid-list-md>
+                <v-layout wrap>
+                  <v-flex xs12>
+                    <v-text-field v-model="login.username" label="Username"></v-text-field>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-text-field v-model="login.password" label="Password" type="password"></v-text-field>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" flat @click="closeLogin">Cancel</v-btn>
+              <v-btn color="blue darken-1" flat @click="loginTb">Login</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-toolbar>
       <!-- Body Card -->
       <v-card-text>
@@ -113,18 +144,18 @@
           </v-flex>
           <!-- Input Variable (with check not empty device) -->
           <v-flex xs12 v-if="form.device || form.asset || form.entityView">
-            <v-layout>
+            <v-layout style="height: 200px; overflow-y: auto;">
               <v-flex xs4 align-self-center>
                 Variable
                 <span class="error--text">*</span>
               </v-flex>
               <v-flex xs2 align-self-center>:</v-flex>
               <v-flex xs6>
-                <v-layout wrap>
-                  <v-flex xs4 v-if="this.listVariables.length === 0">
+                <v-layout column style>
+                  <v-flex xs12 v-if="this.listVariables.length === 0">
                     <p class="error--text">No Variables Available</p>
                   </v-flex>
-                  <v-flex xs4 v-for="item in listVariables" :key="item">
+                  <v-flex xs12 v-for="item in listVariables" :key="item">
                     <v-checkbox
                       v-model="form.telemetries"
                       :label="item"
@@ -147,11 +178,9 @@
               <v-flex xs2 align-self-center>:</v-flex>
               <v-flex xs3>
                 <v-menu
-                  ref="menuStartdate"
                   v-model="menuStartdate"
                   :close-on-content-click="false"
                   :nudge-right="40"
-                  :return-value.sync="form.startTs"
                   lazy
                   transition="scale-transition"
                   offset-y
@@ -161,11 +190,7 @@
                   <template v-slot:activator="{ on }">
                     <v-text-field v-model="form.startTs" prepend-icon="event" readonly v-on="on"></v-text-field>
                   </template>
-                  <v-date-picker v-model="form.startTs" no-title scrollable>
-                    <v-spacer></v-spacer>
-                    <v-btn flat color="primary" @click="menuStartdate = false">Cancel</v-btn>
-                    <v-btn flat color="primary" @click="$refs.menuStartdate.save(form.startTs )">OK</v-btn>
-                  </v-date-picker>
+                  <v-date-picker v-model="form.startTs" @input="menuStartdate = false"></v-date-picker>
                 </v-menu>
               </v-flex>
               <!-- Time Picker Start Time -->
@@ -213,11 +238,9 @@
               <v-flex xs2 align-self-center>:</v-flex>
               <v-flex xs3>
                 <v-menu
-                  ref="menuEnddate"
                   v-model="menuEnddate"
                   :close-on-content-click="false"
                   :nudge-right="40"
-                  :return-value.sync="form.endTs"
                   lazy
                   transition="scale-transition"
                   offset-y
@@ -227,11 +250,7 @@
                   <template v-slot:activator="{ on }">
                     <v-text-field v-model="form.endTs" prepend-icon="event" readonly v-on="on"></v-text-field>
                   </template>
-                  <v-date-picker v-model="form.endTs" no-title scrollable>
-                    <v-spacer></v-spacer>
-                    <v-btn flat color="primary" @click="menuEnddate = false">Cancel</v-btn>
-                    <v-btn flat color="primary" @click="$refs.menuEnddate.save(form.endTs)">OK</v-btn>
-                  </v-date-picker>
+                  <v-date-picker v-model="form.endTs" @input="menuEnddate = false"></v-date-picker>
                 </v-menu>
               </v-flex>
               <!-- Time Picker End Time -->
@@ -302,10 +321,23 @@
       </v-card-text>
       <v-card-actions>
         <!-- Text Support -->
-        <p class="error--text">*Required</p>
+        <v-layout column>
+          <v-flex>
+            <p class="error--text">*Required</p>
+          </v-flex>
+          <v-flex>
+            <p class="primary--text">*Login needed</p>
+          </v-flex>
+          <v-flex>
+            <p class="primary--text">*Default Limit is 100 data</p>
+          </v-flex>
+        </v-layout>
         <v-spacer></v-spacer>
         <!-- Button Download -->
         <v-btn color="blue darken-1" @click="donwloadReport" class="white--text">Dowload</v-btn>
+        <v-spacer></v-spacer>
+        <v-spacer></v-spacer>
+        <v-spacer></v-spacer>
       </v-card-actions>
     </v-card>
   </div>
@@ -313,11 +345,14 @@
 
 <script>
 import fileDownload from "js-file-download";
-const URL = `http://192.168.0.27:5005/api/get/report`;
+const URL = `http://${window.location.host}:5005/api/get/report`;
+const MILLISECONDS_TO_MINUTES = 6000;
 
 export default {
   name: "hello-world",
   data: () => ({
+    token: "",
+    dialogLogin: false,
     error: "",
     loading: false,
     menuStartdate: false,
@@ -360,12 +395,57 @@ export default {
       agg: "NONE",
       limit: "",
       interval: ""
+    },
+    login: {
+      username: "",
+      password: ""
+    },
+    defaultLogin: {
+      username: "",
+      password: ""
     }
   }),
   methods: {
+    logout() {
+      this.token = "";
+      this.$cookies.remove("token");
+      window.open = `http://${window.location.host}:8080`;
+    },
+    closeLogin() {
+      this.dialogLogin = false;
+    },
+    loginTb() {
+      this.loading = true;
+      let body = {
+        username: this.login.username,
+        password: this.login.password
+      };
+      this.$http
+        .post(`${URL}/token`, body, {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(res => {
+          this.$cookies.set("token", res.data);
+          this.getCustomer();
+          this.token = "login";
+          this.dialogLogin = false;
+          this.login = Object.assign({}, this.defaultLogin);
+          this.loading = false;
+        });
+    },
     getCustomer() {
       this.$http
-        .get(`${URL}/customerList`)
+        .post(
+          `${URL}/customerList`,
+          { token: "Bearer " + this.$cookies.get("token") },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
         .then(res => {
           for (let i = 0; i < res.data.length; i++) {
             this.listCustomer.push(res.data[i]);
@@ -382,7 +462,7 @@ export default {
       this.$http
         .post(
           `${URL}/customerDevices`,
-          { customer: val },
+          { customer: val, token: "Bearer " + this.$cookies.get("token") },
           {
             headers: {
               "Content-Type": "application/json"
@@ -406,7 +486,7 @@ export default {
       this.$http
         .post(
           `${URL}/customerAssets`,
-          { customer: val },
+          { customer: val, token: "Bearer " + this.$cookies.get("token") },
           {
             headers: {
               "Content-Type": "application/json"
@@ -430,7 +510,7 @@ export default {
       this.$http
         .post(
           `${URL}/customerEntityView`,
-          { customer: val },
+          { customer: val, token: "Bearer " + this.$cookies.get("token") },
           {
             headers: {
               "Content-Type": "application/json"
@@ -456,7 +536,8 @@ export default {
           `${URL}/attributes`,
           {
             entityType: entityType,
-            entityId: val
+            entityId: val,
+            token: "Bearer " + this.$cookies.get("token")
           },
           {
             headers: {
@@ -548,7 +629,8 @@ export default {
           endTs: new Date(this.form.endTs + " " + this.form.endTime).getTime(),
           agg: this.form.agg,
           limit: this.form.limit,
-          interval: this.form.interval
+          interval: parseInt(this.form.interval) * MILLISECONDS_TO_MINUTES,
+          token: "Bearer " + this.$cookies.get("token")
         };
         this.$http
           .post(`${URL}`, body, {
@@ -596,6 +678,7 @@ export default {
 
               this.loading = false;
               this.form = Object.assign({}, this.default);
+              this.error = "";
             }
           })
           .catch(err => {
@@ -607,9 +690,13 @@ export default {
     }
   },
   mounted() {
-    this.getCustomer();
     this.getMode();
     this.getEntityType();
+  },
+  beforeDestroy() {
+    if (this.$cookies.isKey("token")) {
+      this.$cookies.remove("token");
+    }
   }
 };
 </script>

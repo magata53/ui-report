@@ -12,6 +12,7 @@
     "core-js": "^2.6.5",
     "js-file-download": "^0.4.7",
     "vue": "^2.6.10",
+    "vue-cookies": "^1.5.13",
     "vue-router": "^3.0.7",
     "vuetify": "^1.5.5"
   },
