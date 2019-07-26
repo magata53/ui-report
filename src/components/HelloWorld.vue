@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-card>
+      <!-- Dialog loading for wait response from API -->
       <v-dialog v-model="loading" hide-overlay persistent width="300">
         <v-card color="primary" dark>
           <v-card-text>
@@ -9,16 +10,19 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-
+      <!-- Header Card -->
       <v-toolbar dark color="primary">
         <v-toolbar-title>Report</v-toolbar-title>
       </v-toolbar>
-
+      <!-- Body Card -->
       <v-card-text>
+        <!-- Text error -->
         <v-layout align-center justify-center v-if="error">
           <p class="error--text">{{error}}</p>
         </v-layout>
+        <!-- Form report -->
         <v-layout wrap>
+          <!-- Input Customer -->
           <v-flex xs12>
             <v-layout>
               <v-flex xs4 align-self-center>
@@ -37,8 +41,21 @@
               </v-flex>
             </v-layout>
           </v-flex>
-
+          <!-- Input Entity Type -->
           <v-flex xs12 v-if="form.customer">
+            <v-layout>
+              <v-flex xs4 align-self-center>
+                Entity Type
+                <span class="error--text">*</span>
+              </v-flex>
+              <v-flex xs2 align-self-center>:</v-flex>
+              <v-flex xs4>
+                <v-select v-model="form.entityType" :items="listEntityType"></v-select>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+          <!-- Input Device (with check entityType === DEVICE) -->
+          <v-flex xs12 v-if="form.entityType === 'DEVICE'">
             <v-layout>
               <v-flex xs4 align-self-center>
                 Device Name
@@ -56,8 +73,46 @@
               </v-flex>
             </v-layout>
           </v-flex>
-
-          <v-flex xs12 v-if="form.device">
+          <!-- Input Device (with check entityType === ASSET) -->
+          <v-flex xs12 v-if="form.entityType === 'ASSET'">
+            <v-layout>
+              <v-flex xs4 align-self-center>
+                Asset Name
+                <span class="error--text">*</span>
+              </v-flex>
+              <v-flex xs2 align-self-center>:</v-flex>
+              <v-flex xs4>
+                <v-select
+                  v-model="form.asset"
+                  :items="listAsset"
+                  item-text="name"
+                  item-value="id"
+                  @change="onChangeAsset"
+                ></v-select>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+          <!-- Input Device (with check entityType === ENTITY_VIEW) -->
+          <v-flex xs12 v-if="form.entityType === 'ENTITY_VIEW'">
+            <v-layout>
+              <v-flex xs4 align-self-center>
+                Entity View Name
+                <span class="error--text">*</span>
+              </v-flex>
+              <v-flex xs2 align-self-center>:</v-flex>
+              <v-flex xs4>
+                <v-select
+                  v-model="form.entityView"
+                  :items="listEntityView"
+                  item-text="name"
+                  item-value="id"
+                  @change="onChangeEntityView"
+                ></v-select>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+          <!-- Input Variable (with check not empty device) -->
+          <v-flex xs12 v-if="form.device || form.asset || form.entityView">
             <v-layout>
               <v-flex xs4 align-self-center>
                 Variable
@@ -81,9 +136,10 @@
               </v-flex>
             </v-layout>
           </v-flex>
-
+          <!-- Select Start Date and Time -->
           <v-flex xs12>
             <v-layout>
+              <!-- Date Picker Start Date -->
               <v-flex xs4 align-self-center>
                 Start Date
                 <span class="error--text">*</span>
@@ -112,6 +168,7 @@
                   </v-date-picker>
                 </v-menu>
               </v-flex>
+              <!-- Time Picker Start Time -->
               <v-flex xs3 v-if="form.startTs">
                 <v-menu
                   ref="menuStartTime"
@@ -145,8 +202,10 @@
               </v-flex>
             </v-layout>
           </v-flex>
+          <!-- Select End Date and Time -->
           <v-flex xs12>
             <v-layout>
+              <!-- Date Picker End Date -->
               <v-flex xs4 align-self-center>
                 End Date
                 <span class="error--text">*</span>
@@ -175,6 +234,7 @@
                   </v-date-picker>
                 </v-menu>
               </v-flex>
+              <!-- Time Picker End Time -->
               <v-flex xs3 v-if="form.endTs">
                 <v-menu
                   ref="menuEndTime"
@@ -208,6 +268,7 @@
               </v-flex>
             </v-layout>
           </v-flex>
+          <!-- Input Mode / Agg -->
           <v-flex xs12>
             <v-layout>
               <v-flex xs4 align-self-center>Mode</v-flex>
@@ -217,6 +278,7 @@
               </v-flex>
             </v-layout>
           </v-flex>
+          <!-- Input Limit Data telemetry -->
           <v-flex xs12>
             <v-layout>
               <v-flex xs4 align-self-center>Limit (data)</v-flex>
@@ -226,6 +288,7 @@
               </v-flex>
             </v-layout>
           </v-flex>
+          <!-- Input Interval -->
           <v-flex xs12>
             <v-layout>
               <v-flex xs4 align-self-center>Interval (minutes)</v-flex>
@@ -238,9 +301,11 @@
         </v-layout>
       </v-card-text>
       <v-card-actions>
+        <!-- Text Support -->
         <p class="error--text">*Required</p>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" @click="donwloadReport" class="white--text">Find</v-btn>
+        <!-- Button Download -->
+        <v-btn color="blue darken-1" @click="donwloadReport" class="white--text">Dowload</v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -262,9 +327,15 @@ export default {
     listVariables: [],
     listCustomer: [{ id: null, name: "select" }],
     listDevice: [{ id: null, name: "select" }],
+    listAsset: [{ id: null, name: "select" }],
+    listEntityView: [{ id: null, name: "select" }],
     listMode: [],
+    listEntityType: [],
     form: {
       customer: null,
+      entityType: null,
+      asset: null,
+      entityView: null,
       device: null,
       telemetries: [],
       startTs: "",
@@ -277,6 +348,9 @@ export default {
     },
     default: {
       customer: null,
+      entityType: null,
+      asset: null,
+      entityView: null,
       device: null,
       telemetries: [],
       startTs: "",
@@ -297,7 +371,11 @@ export default {
             this.listCustomer.push(res.data[i]);
           }
         })
-        .catch(err => {});
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
     },
     getDevice(val) {
       this.loading = true;
@@ -317,14 +395,69 @@ export default {
           }
           this.loading = false;
         })
-        .catch(err => {});
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
     },
-    getVariable(val) {
+    getAsset(val) {
+      this.loading = true;
+      this.$http
+        .post(
+          `${URL}/customerAssets`,
+          { customer: val },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(res => {
+          for (let j = 0; j < res.data.length; j++) {
+            this.listAsset.push(res.data[j]);
+          }
+          this.loading = false;
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    getEntityView(val) {
+      this.loading = true;
+      this.$http
+        .post(
+          `${URL}/customerEntityView`,
+          { customer: val },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(res => {
+          for (let j = 0; j < res.data.length; j++) {
+            this.listEntityView.push(res.data[j]);
+          }
+          this.loading = false;
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    getVariable(val, entityType) {
       this.loading = true;
       this.$http
         .post(
           `${URL}/attributes`,
-          { device: val },
+          {
+            entityType: entityType,
+            entityId: val
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -335,7 +468,11 @@ export default {
           this.listVariables = res.data;
           this.loading = false;
         })
-        .catch(err => {});
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
     },
     getMode() {
       const mode = [
@@ -348,17 +485,43 @@ export default {
       ];
       this.listMode = mode;
     },
+    getEntityType() {
+      const entityType = [
+        { text: "Select", value: null },
+        { text: "Asset", value: "ASSET" },
+        { text: "Device", value: "DEVICE" },
+        { text: "Entity View", value: "ENTITY_VIEW" }
+      ];
+      this.listEntityType = entityType;
+    },
     onChangeCustomer(val) {
       this.getDevice(val);
+      this.getAsset(val);
+      this.getEntityView(val);
     },
     onChangeDevice(val) {
-      this.getVariable(val);
+      let entityType = this.form.entityType;
+      this.getVariable(val, entityType);
+    },
+    onChangeAsset(val) {
+      let entityType = this.form.entityType;
+      this.getVariable(val, entityType);
+    },
+    onChangeEntityView(val) {
+      let entityType = this.form.entityType;
+      this.getVariable(val, entityType);
     },
     donwloadReport() {
       if (this.form.customer === null) {
         this.error = "Customer cannot be empty";
-      } else if (this.form.device === null) {
-        this.error = "Device cannot be empty";
+      } else if (this.form.entityType === null) {
+        this.error = "Enity Type cannot be empty";
+      } else if (
+        this.form.device === null &&
+        this.form.asset === null &&
+        this.form.entityView === null
+      ) {
+        this.error = "Asset or Device or Entity View cannot be empty";
       } else if (this.form.telemetries.length === 0) {
         this.error = "Must select one or more variable";
       } else if (this.form.startTs === "" || this.form.startTime === "") {
@@ -367,8 +530,17 @@ export default {
         this.error = "End date and time cannot be empty";
       } else {
         this.loading = true;
+        let entityId = "";
+        if (this.form.entityType === "ASSET") {
+          entityId = this.form.asset;
+        } else if (this.form.entityType === "DEVICE") {
+          entityId = this.form.device;
+        } else {
+          entityId = this.form.entityView;
+        }
         let body = {
-          device: this.form.device,
+          entityType: this.form.entityType,
+          entityId: entityId,
           telemetries: this.form.telemetries.join(),
           startTs: new Date(
             this.form.startTs + " " + this.form.startTime
@@ -378,7 +550,6 @@ export default {
           limit: this.form.limit,
           interval: this.form.interval
         };
-        console.log(JSON.stringify(body));
         this.$http
           .post(`${URL}`, body, {
             responseType: "blob",
@@ -387,29 +558,58 @@ export default {
             }
           })
           .then(res => {
-            console.log(res);
             if (res.status === 200) {
-              for (let x = 0; x < this.listDevice.length; x++) {
-                if (this.form.device === this.listDevice[x].id) {
-                  fileDownload(
-                    res.data,
-                    `${
-                      this.listDevice[x].name
-                    }-${new Date().toLocaleString()}.xlsx`
-                  );
+              if (this.form.entityType === "ASSET") {
+                for (let x = 0; x < this.listAsset.length; x++) {
+                  if (this.form.asset === this.listAsset[x].id) {
+                    fileDownload(
+                      res.data,
+                      `${
+                        this.listAsset[x].name
+                      }-${new Date().toLocaleString()}.xlsx`
+                    );
+                  }
+                }
+              } else if (this.form.entityType === "DEVICE") {
+                for (let x = 0; x < this.listDevice.length; x++) {
+                  if (this.form.device === this.listDevice[x].id) {
+                    fileDownload(
+                      res.data,
+                      `${
+                        this.listDevice[x].name
+                      }-${new Date().toLocaleString()}.xlsx`
+                    );
+                  }
+                }
+              } else {
+                for (let x = 0; x < this.listEntityView.length; x++) {
+                  if (this.form.entityView === this.listEntityView[x].id) {
+                    fileDownload(
+                      res.data,
+                      `${
+                        this.listEntityView[x].name
+                      }-${new Date().toLocaleString()}.xlsx`
+                    );
+                  }
                 }
               }
+
               this.loading = false;
               this.form = Object.assign({}, this.default);
             }
           })
-          .catch(err => {});
+          .catch(err => {
+            if (err) {
+              this.error = "Can't connect to the server";
+            }
+          });
       }
     }
   },
   mounted() {
     this.getCustomer();
     this.getMode();
+    this.getEntityType();
   }
 };
 </script>
