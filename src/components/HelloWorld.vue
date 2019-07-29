@@ -15,7 +15,7 @@
         <v-toolbar-title>Report</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn color="deep-orange" dark class="mb-2" v-if="token != ''" @click="logout">Log out</v-btn>
-        <v-dialog v-model="dialogLogin" max-width="500px" v-if="token === ''">
+        <v-dialog v-model="dialogLogin" max-width="500px" v-if="token === ''" persistent>
           <template v-slot:activator="{ on }">
             <v-btn color="deep-orange" dark class="mb-2" v-on="on">Login</v-btn>
           </template>
@@ -39,8 +39,8 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" flat @click="closeLogin">Cancel</v-btn>
-              <v-btn color="blue darken-1" flat @click="loginTb">Login</v-btn>
+              <v-btn color="blue darken-1" flat @click="closeLogin" @keyup.esc="closeLogin">Cancel</v-btn>
+              <v-btn color="blue darken-1" flat @click="loginTb" @keyup.enter="loginTb">Login</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -379,7 +379,7 @@ export default {
       endTime: "",
       agg: "NONE",
       limit: "",
-      interval: ""
+      interval: 0
     },
     default: {
       customer: null,
@@ -394,7 +394,7 @@ export default {
       endTime: "",
       agg: "NONE",
       limit: "",
-      interval: ""
+      interval: 0
     },
     login: {
       username: "",
@@ -409,7 +409,6 @@ export default {
     logout() {
       this.token = "";
       this.$cookies.remove("token");
-      window.open = `http://${window.location.host}:8080`;
     },
     closeLogin() {
       this.dialogLogin = false;
@@ -433,6 +432,11 @@ export default {
           this.dialogLogin = false;
           this.login = Object.assign({}, this.defaultLogin);
           this.loading = false;
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
         });
     },
     getCustomer() {
