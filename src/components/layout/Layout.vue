@@ -2,10 +2,12 @@
 <nav>
     <v-toolbar color="primary" dark fixed app>
       <v-toolbar-side-icon @click="drawer = !drawer" v-show="hidden"></v-toolbar-side-icon>
-      <v-toolbar-title>REPORT TB</v-toolbar-title>
+      <v-toolbar-title>GSPE</v-toolbar-title>
       <v-toolbar-items class="hidden-sm-and-down">
-      <v-btn flat class="ml-5" to="/reports" active-class>Report</v-btn>
+      <v-btn flat class="ml-5" to="/reports">Report</v-btn>
       <v-btn flat to="/rules">Rules</v-btn>
+      <v-btn flat to="/scheduler">Scheduler</v-btn>
+      <v-btn flat to="/calendar">Calendar</v-btn>
     </v-toolbar-items>
     <v-spacer></v-spacer>
     <v-btn flat @click="logOut">Log Out</v-btn>
@@ -54,6 +56,16 @@ data() {
         title: "Rules",
         icon: "settings_input_component",
         link: "/rules"
+      },
+      {
+        title: "Scheduler",
+        icon: "scedule",
+        link: "/scheduler"
+      },
+      {
+        title: "Calendar",
+        icon: "event",
+        link: "/calendar"
       },
     ]
   }

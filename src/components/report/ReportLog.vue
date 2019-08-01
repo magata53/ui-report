@@ -110,14 +110,14 @@
         <v-flex xs12 v-if="form.device || form.asset || form.entityView">
           <v-layout style="height: 200px; overflow-y: auto;">
             <v-flex xs4 align-self-center>
-              Variable
+              Telemetry
               <span class="error--text">*</span>
             </v-flex>
             <v-flex xs2 align-self-center>:</v-flex>
             <v-flex xs6>
               <v-layout column style>
                 <v-flex xs12 v-if="this.listVariables.length === 0">
-                  <p class="error--text">No Variables Available</p>
+                  <p class="error--text">No Telemetry Available</p>
                 </v-flex>
                 <v-flex xs12 v-for="item in listVariables" :key="item">
                   <v-checkbox
@@ -305,7 +305,7 @@
 
 <script>
 import fileDownload from "js-file-download";
-const URL = `http://${window.location.host}:5005/api/get/report`;
+const URL = `http://192.168.0.70:5005/api/get/report`;
 const MILLISECONDS_TO_MINUTES = 6000;
 
 export default {
@@ -379,6 +379,8 @@ export default {
         });
     },
     getDevice(val) {
+      this.listDevice = [{name: "Select", id: null},]
+      this.form.device = null;
       this.loading = true;
       this.$http
         .post(
@@ -403,6 +405,8 @@ export default {
         });
     },
     getAsset(val) {
+      this.listAsset = [{name: "Select", id: null},]
+      this.form.asset = null;
       this.loading = true;
       this.$http
         .post(
@@ -427,6 +431,8 @@ export default {
         });
     },
     getEntityView(val) {
+      this.listEntityView = [{name: "Select", id: null},]
+      this.form.entityView = null;
       this.loading = true;
       this.$http
         .post(

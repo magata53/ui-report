@@ -1,5 +1,5 @@
 <template>
-  <v-layout align-center justify-center fill-height column max-widtg="100%">
+  <v-layout align-center justify-center fill-height column max-width="100%">
      <!-- Dialog loading for wait response from API -->
     <v-dialog v-model="loadingApi" hide-overlay persistent width="300">
       <v-card color="primary" dark>
@@ -53,7 +53,7 @@
                     </v-flex>
                   </v-layout>
                 </v-flex>
-                <v-flex xs12>
+                <v-flex xs12 v-if="editedItem.customer">
                   <v-layout>
                     <v-flex xs4 align-self-center>Device</v-flex>
                     <v-flex xs2 align-self-center>:</v-flex>
@@ -68,12 +68,12 @@
                     </v-flex>
                   </v-layout>
                 </v-flex>
-                <v-flex xs12>
+                <v-flex xs12 v-if="editedItem.device">
                   <v-layout>
-                    <v-flex xs4 align-self-center>Variable</v-flex>
+                    <v-flex xs4 align-self-center>Telemetry</v-flex>
                     <v-flex xs2 align-self-center>:</v-flex>
                     <v-flex xs4>
-                      <v-select v-model="editedItem.variable" :items="listVariable"></v-select>
+                      <v-select v-model="editedItem.telemetry" :items="listTelemetry"></v-select>
                     </v-flex>
                   </v-layout>
                 </v-flex>
@@ -155,9 +155,9 @@
                 </v-flex>
                 <v-flex xs12>
                   <v-layout>
-                    <v-flex xs4>Variable</v-flex>
+                    <v-flex xs4>Telemetry</v-flex>
                     <v-flex xs2>:</v-flex>
-                    <v-flex xs4>{{editedItem.variable}}</v-flex>
+                    <v-flex xs4>{{editedItem.telemetry}}</v-flex>
                   </v-layout>
                 </v-flex>
                 <v-flex xs12>
@@ -220,7 +220,7 @@
     >
       <template v-slot:items="props">
         <td class="text-xs-left">{{ props.index + 1}}</td>
-        <td class="text-xs-left">{{ props.item.variable }}</td>
+        <td class="text-xs-left">{{ props.item.telemetry }}</td>
         <td class="text-xs-left">{{ props.item.min }}</td>
         <td class="text-xs-left">{{ props.item.max }}</td>
         <td class="text-xs-left">
@@ -240,7 +240,7 @@
 </template>
 
 <script>
-const URL = `http://${window.location.host}:5005/api`;
+const URL = `http://192.168.0.70:5005/api`;
 export default {
   name: "rules",
   data: () => ({
@@ -254,14 +254,14 @@ export default {
         text: "No",
         sortable: false
       },
-      { text: "Variable", value: "variable", sortable: false },
+      { text: "Telemetry", value: "telemetry", sortable: false },
       { text: "Max", value: "max", sortable: false },
       { text: "Min", value: "min", sortable: false },
       { text: "Status", value: "status", sortable: false },
-      { text: "Actions", value: "variable", sortable: false }
+      { text: "Actions", value: "telemetry", sortable: false }
     ],
     items: [],
-    listVariable: [{ text: "Select", value: null },],
+    listTelemetry: [{ text: "Select", value: null },],
     listCustomer: [{ name: "Select", id: null },],
     listDevice: [{ name: "Select", id: null },],
     editedIndex: -1,
@@ -288,7 +288,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1
         ? "Create New Scheduler "
-        : `${this.method} ${this.editedItem.variable}`;
+        : `${this.method} ${this.editedItem.telemetry}`;
     },
   },
 
@@ -333,6 +333,8 @@ export default {
         });
     },
     getDevice(val) {
+      this.listDevice = [{name: "Select", id: null},]
+      this.editedItem.device = null;
       this.loadingApi = true;
       this.$http
         .post(
@@ -356,7 +358,9 @@ export default {
           }
         });
     },
-    getVariable(val) {
+    getTelemetry(val) {
+      this.listTelemetry = [{text: "Select", value: null},]
+      this.editedItem.telemetry = null;
       this.loadingApi = true;
       this.$http
         .post(
@@ -370,7 +374,7 @@ export default {
         )
         .then(res => {
           for (let k = 0; k < res.data.length; k++) {
-            this.listVariable.push(res.data[k]);
+            this.listTelemetry.push(res.data[k]);
           }
           this.loadingApi = false;
         })
@@ -401,7 +405,7 @@ export default {
           this.items.push({
             id: res.data[y].id,
             device: res.data[y].device_id,
-            variable: res.data[y].variable,
+            telemetry: res.data[y].variable,
             max: res.data[y].max,
             min: res.data[y].min,
             status: res.data[y].relations[0].status_id
@@ -418,7 +422,7 @@ export default {
       this.getDevice(val);
     },
     onChangeDevice(val) {
-      this.getVariable(val)
+      this.getTelemetry(val)
     },
     editItem(item) {
       this.method = "Edit";
@@ -472,8 +476,8 @@ export default {
         this.error = "Must select the customer";
       } else if (this.editedItem.device === null) {
         this.error = "Must select the device";
-      } else if (this.editedItem.variable === null) {
-        this.error = "Must select the variable";
+      } else if (this.editedItem.telemetry === null) {
+        this.error = "Must select the telemetry";
       } else if (this.editedItem.max === 0) {
         this.error = "Max value cannot be empty";
       } else if (this.editedItem.min === 0) {
@@ -483,7 +487,7 @@ export default {
       } else if (this.editedIndex > -1) {
         this.$http.patch(`${URL}/patch/rule/${this.editedItem.id}`, {
           device_id: this.editedItem.device,
-          variable: this.editedItem.variable,
+          variable: this.editedItem.telemetry,
           max: this.editedItem.max,
           min: this.editedItem.min,
           status: this.editedItem.status
@@ -509,7 +513,7 @@ export default {
         this.loadingApi = true
         this.$http.post(`${URL}/post/rule`, {
           device_id: this.editedItem.device,
-          variable: this.editedItem.variable,
+          variable: this.editedItem.telemetry,
           max: this.editedItem.max,
           min: this.editedItem.min,
           status: this.editedItem.status

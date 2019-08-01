@@ -4,8 +4,8 @@ import App from './App.vue'
 import router from './router/router.js'
 import axios from 'axios'
 import VueCookies from 'vue-cookies'
-import Layout from './components/Layout.vue'
-import Default from './components/Default.vue'
+import Layout from './components/layout/Layout.vue'
+import Default from './components/layout/Default.vue'
 
 Vue.use(VueCookies)
 Vue.component('layout', Layout);

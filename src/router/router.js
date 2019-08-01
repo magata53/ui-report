@@ -19,7 +19,7 @@ const menuLink = [
         meta: {
             requiresAuth: true
         },
-        component: () => import('../components/Report.vue'),
+        component: () => import('../components/report/Report.vue'),
     },
     {
         name: 'rules',
@@ -27,14 +27,30 @@ const menuLink = [
         meta: {
             requiresAuth: true
         },
-        component: () => import('../components/Rules.vue'),
+        component: () => import('../components/report/Rules.vue'),
+    },
+    {
+        name: 'scheduler',
+        path: '/scheduler',
+        meta: {
+            requiresAuth: true
+        },
+        component: () => import('../components/scheduler/Scheduler.vue'),
+    },
+    {
+        name: 'calendar',
+        path: '/calendar',
+        meta: {
+            requiresAuth: true
+        },
+        component: () => import('../components/scheduler/Calendar.vue'),
     },
 ];
 
 const router = new VueRouter({
     routes: menuLink,
     mode: "history",
-    base: "/report/"
+    base: "/ui/"
 });
 
 /* eslint-disable */
