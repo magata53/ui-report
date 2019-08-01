@@ -554,7 +554,7 @@ export default {
           token: "Bearer " + this.$cookies.get("token")
         };
         this.$http
-          .post(`${URL}`, body, {
+          .post(`${URL}/excel`, body, {
             responseType: "blob",
             headers: {
               "Content-Type": "application/json"

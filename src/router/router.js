@@ -34,7 +34,7 @@ const menuLink = [
 const router = new VueRouter({
     routes: menuLink,
     mode: "history",
-    // base: "/report/"
+    base: "/report/"
 });
 
 /* eslint-disable */

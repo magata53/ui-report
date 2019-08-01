@@ -46,7 +46,7 @@
 </template>
 
 <script>
-const URL = `http://192.168.0.70:5005/api/get/report`;
+const URL = `http://${window.location.host}:5005/api/get/report`;
 export default {
   name: "login",
   data() {

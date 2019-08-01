@@ -306,7 +306,7 @@
       <v-window-item :value="2">
         <v-card-text>
           <v-layout wrap>
-            <v-flex xs12>
+            <!-- <v-flex xs12>
               <v-layout>
                 <v-flex xs4 align-self-center>
                   Report Name
@@ -317,7 +317,7 @@
                   <v-text-field v-model="form.report_name" type="text"></v-text-field>
                 </v-flex>
               </v-layout>
-            </v-flex>
+            </v-flex> -->
             <v-flex xs12>
               <v-layout>
                 <v-flex xs4 align-self-center>
@@ -368,7 +368,7 @@
 
 <script>
 import fileDownload from "js-file-download";
-const URL = `http://192.168.0.70:5005/api/get/report`;
+const URL = `http://${window.location.host}:5005/api/get/report`;
 const MILLISECONDS_TO_MINUTES = 6000;
 
 export default {
@@ -610,6 +610,13 @@ export default {
         } else {
           entityId = this.form.entityView;
         }
+        let deviceName = '';
+        for(let t =0; t < this.listDevice.length; t++) {
+          if(entityId === this.listDevice[t].id) {
+            deviceName = this.listDevice[t].name
+            break
+          }
+        }
         let body = {
           entityType: this.form.entityType,
           entityId: entityId,
@@ -621,10 +628,13 @@ export default {
           agg: this.form.agg,
           limit: this.form.limit,
           interval: parseInt(this.form.interval) * MILLISECONDS_TO_MINUTES,
-          token: "Bearer " + this.$cookies.get("token")
+          token: "Bearer " + this.$cookies.get("token"),
+          deviceName: deviceName,
+          date: this.form.created_at,
+          createdBy: this.form.created_by
         };
         this.$http
-          .post(`${URL}`, body, {
+          .post(`${URL}/pdf`, body, {
             responseType: "blob",
             headers: {
               "Content-Type": "application/json"
@@ -639,7 +649,7 @@ export default {
                       res.data,
                       `${
                         this.listAsset[x].name
-                      }-${new Date().toLocaleString()}.xlsx`
+                      }-${new Date().toLocaleString()}.pdf`
                     );
                   }
                 }
@@ -650,7 +660,7 @@ export default {
                       res.data,
                       `${
                         this.listDevice[x].name
-                      }-${new Date().toLocaleString()}.xlsx`
+                      }-${new Date().toLocaleString()}.pdf`
                     );
                   }
                 }
@@ -661,7 +671,7 @@ export default {
                       res.data,
                       `${
                         this.listEntityView[x].name
-                      }-${new Date().toLocaleString()}.xlsx`
+                      }-${new Date().toLocaleString()}.pdf`
                     );
                   }
                 }

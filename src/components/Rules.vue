@@ -1,5 +1,15 @@
 <template>
-  <v-layout align-center justify-center fill-height column>
+  <v-layout align-center justify-center fill-height column max-widtg="100%">
+     <!-- Dialog loading for wait response from API -->
+    <v-dialog v-model="loadingApi" hide-overlay persistent width="300">
+      <v-card color="primary" dark>
+        <v-card-text>
+          Please wait ......
+          <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
     <div>
     <!-- Judul table Rules -->
     <v-toolbar>
@@ -8,7 +18,7 @@
       <v-spacer></v-spacer>
 
       <!-- Dialog buat baru dan edit scheduler -->
-      <v-dialog v-model="dialog" persistent max-width="500px">
+      <v-dialog v-model="dialog" persistent max-width="700">
         <!-- Tombol buat baru -->
         <template v-slot:activator="{ on }">
           <v-btn color="primary" dark class="mb-2" v-on="on">Create</v-btn>
@@ -21,9 +31,9 @@
             <span class="headline">{{ formTitle }}</span>
           </v-card-title>
 
-          <!-- Body dialog berisi form untuk buat dan edit -->
+          <!-- Body dialog berisi form untuk create -->
           <v-card-text>
-            <v-container grid-list-md v-if="method === 'Edit' || method === 'New'">
+            <v-container grid-list-md v-if="method === 'New'">
               <v-layout align-center justify-center v-if="error">
                 <p class="error--text">{{error}}</p>
               </v-layout>
@@ -36,6 +46,8 @@
                       <v-select
                         v-model="editedItem.customer"
                         :items="listCustomer"
+                        item-text="name"
+                        item-value="id"
                         @change="onChangeCustomer"
                       ></v-select>
                     </v-flex>
@@ -49,6 +61,8 @@
                       <v-select
                         v-model="editedItem.device"
                         :items="listDevice"
+                        item-text="name"
+                        item-value="id"
                         @change="onChangeDevice"
                       ></v-select>
                     </v-flex>
@@ -86,7 +100,43 @@
                     <v-flex xs4 align-self-center>Status</v-flex>
                     <v-flex xs2 align-self-center>:</v-flex>
                     <v-flex xs4>
-                      <v-select v-model="editedItem.status" :items="listStatus"></v-select>
+                      <v-select v-model="editedItem.status" :items="listStatus" item-text="name" item-value="id"></v-select>
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+              </v-layout>
+            </v-container>
+
+          <!-- Body dialog berisi form untuk edit -->
+            <v-container grid-list-md v-else-if="method === 'Edit'">
+              <v-layout align-center justify-center v-if="error">
+                <p class="error--text">{{error}}</p>
+              </v-layout>
+              <v-layout wrap>
+                <v-flex xs12>
+                  <v-layout>
+                    <v-flex xs4 align-self-center>Min</v-flex>
+                    <v-flex xs2 align-self-center>:</v-flex>
+                    <v-flex xs4>
+                      <v-text-field v-model="editedItem.min" type="number"></v-text-field>
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+                <v-flex xs12>
+                  <v-layout>
+                    <v-flex xs4 align-self-center>Max</v-flex>
+                    <v-flex xs2 align-self-center>:</v-flex>
+                    <v-flex xs4>
+                      <v-text-field v-model="editedItem.max" type="number"></v-text-field>
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+                <v-flex xs12>
+                  <v-layout>
+                    <v-flex xs4 align-self-center>Status</v-flex>
+                    <v-flex xs2 align-self-center>:</v-flex>
+                    <v-flex xs4>
+                      <v-select v-model="editedItem.status" :items="listStatus" item-text="name" item-value="id"></v-select>
                     </v-flex>
                   </v-layout>
                 </v-flex>
@@ -98,16 +148,9 @@
               <v-layout wrap>
                 <v-flex xs12>
                   <v-layout>
-                    <v-flex xs4>Customer</v-flex>
-                    <v-flex xs2>:</v-flex>
-                    <v-flex xs4>{{editedItem.customer}}</v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
                     <v-flex xs4>Device</v-flex>
                     <v-flex xs2>:</v-flex>
-                    <v-flex xs4>{{editedItem.device}}</v-flex>
+                    <v-flex xs6>{{editedItem.device}}</v-flex>
                   </v-layout>
                 </v-flex>
                 <v-flex xs12>
@@ -135,7 +178,11 @@
                   <v-layout>
                     <v-flex xs4>Status</v-flex>
                     <v-flex xs2>:</v-flex>
-                    <v-flex xs4>{{editedItem.status}}</v-flex>
+                    <v-flex xs4>
+                      <span class="green--text" v-if="editedItem.status === 3">normal</span>
+                      <span class="yellow--text" v-else-if="editedItem.status === 2">minor</span>
+                      <span class="red--text" v-else>major</span>
+                    </v-flex>
                   </v-layout>
                 </v-flex>
               </v-layout>
@@ -177,14 +224,10 @@
         <td class="text-xs-left">{{ props.item.min }}</td>
         <td class="text-xs-left">{{ props.item.max }}</td>
         <td class="text-xs-left">
-          <span class="green--text" v-if="props.item.status === 'normal'">{{ props.item.status }}</span>
-          <span
-            class="yellow--text"
-            v-else-if="props.item.status === 'minor'"
-          >{{ props.item.status }}</span>
-          <span class="red--text" v-else>{{ props.item.status }}</span>
+          <span class="green--text" v-if="props.item.status === 3">normal</span>
+          <span class="yellow--text" v-else-if="props.item.status === 2">minor</span>
+          <span class="red--text" v-else>major</span>
         </td>
-
         <td class="text-xs-left">
           <v-icon class="mr-2" @click="detailItem(props.item)" color="primary">info</v-icon>
           <v-icon class="mr-2" @click="editItem(props.item)" color="success">edit</v-icon>
@@ -197,9 +240,11 @@
 </template>
 
 <script>
+const URL = `http://${window.location.host}:5005/api`;
 export default {
   name: "rules",
   data: () => ({
+    loadingApi: false,
     error: "",
     loading: false,
     method: "New",
@@ -216,9 +261,9 @@ export default {
       { text: "Actions", value: "variable", sortable: false }
     ],
     items: [],
-    listVariable: [],
-    listCustomer: [],
-    listDevice: [],
+    listVariable: [{ text: "Select", value: null },],
+    listCustomer: [{ name: "Select", id: null },],
+    listDevice: [{ name: "Select", id: null },],
     editedIndex: -1,
     editedItem: {
       customer: null,
@@ -236,24 +281,7 @@ export default {
       min: 0,
       status: null
     },
-    listDeviceDummy: [
-      { text: "Select", value: null },
-      { text: "Device 1", value: "Device 1" }
-    ],
-    listCustomerDummy: [
-      { text: "Select", value: null },
-      { text: "Customer 1", value: "C1" }
-    ],
-    listVariableDummy: [
-      { text: "Select", value: null },
-      { text: "humidity", value: "humidity" }
-    ],
-    listStatus: [
-      { text: "Select", value: null },
-      { text: "normal", value: "normal" },
-      { text: "minor", value: "minor" },
-      { text: "major", value: "major" }
-    ]
+    listStatus: [{ name: "Select", id: null },]
   }),
 
   computed: {
@@ -261,7 +289,7 @@ export default {
       return this.editedIndex === -1
         ? "Create New Scheduler "
         : `${this.method} ${this.editedItem.variable}`;
-    }
+    },
   },
 
   watch: {
@@ -273,47 +301,124 @@ export default {
   mounted() {
     this.loading = true;
 
+    this.getStatus();
+    this.getCustomer();
     setTimeout(() => {
       this.loading = false;
-      this.initialize();
-      this.listCustomer = this.listCustomerDummy;
-    }, 3000);
+      this.getRules();
+    }, 300);
   },
 
   methods: {
-    initialize() {
-      this.items = [
-        {
-          customer: "customer 1",
-          device: "device 1",
-          variable: "temperature",
-          max: 27,
-          min: 25,
-          status: "normal"
-        },
-        {
-          customer: "customer 1",
-          device: "device 1",
-          variable: "temperature",
-          max: 25,
-          min: 16,
-          status: "minor"
-        },
-        {
-          customer: "customer 1",
-          device: "device 1",
-          variable: "temperature",
-          max: 32,
-          min: 27,
-          status: "major"
+    getCustomer() {
+      this.$http
+        .post(
+          `${URL}/get/report/customerList`,
+          { token: "Bearer " + this.$cookies.get("token") },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(res => {
+          for (let i = 0; i < res.data.length; i++) {
+            this.listCustomer.push(res.data[i]);
+          }
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    getDevice(val) {
+      this.loadingApi = true;
+      this.$http
+        .post(
+          `${URL}/get/report/customerDevices`,
+          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(res => {
+          for (let j = 0; j < res.data.length; j++) {
+            this.listDevice.push(res.data[j]);
+          }
+          this.loadingApi = false;
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    getVariable(val) {
+      this.loadingApi = true;
+      this.$http
+        .post(
+          `${URL}/get/report/attributes`,
+          { entityId: val, token: "Bearer " + this.$cookies.get("token"), entityType: "DEVICE" },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(res => {
+          for (let k = 0; k < res.data.length; k++) {
+            this.listVariable.push(res.data[k]);
+          }
+          this.loadingApi = false;
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    getStatus() {
+      this.$http.get(`${URL}/get/rule/status`)
+        .then(res => {
+          for (let l = 0; l < res.data.length; l++) {
+            this.listStatus.push(res.data[l]);
+          }
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    getRules() {
+      this.items = []
+      this.$http.get(`${URL}/get/rule`)
+      .then(res => {
+        for(let y = 0; y < res.data.length; y++) {
+          this.items.push({
+            id: res.data[y].id,
+            device: res.data[y].device_id,
+            variable: res.data[y].variable,
+            max: res.data[y].max,
+            min: res.data[y].min,
+            status: res.data[y].relations[0].status_id
+          })
         }
-      ];
+      })
+      .catch(err => {
+        if (err) {
+            this.error = "Can't connect to the server";
+          }
+      })
     },
-    onChangeCustomer() {
-      this.listDevice = this.listDeviceDummy;
+    onChangeCustomer(val) {
+      this.getDevice(val);
     },
-    onChangeDevice() {
-      this.listVariable = this.listVariableDummy;
+    onChangeDevice(val) {
+      this.getVariable(val)
     },
     editItem(item) {
       this.method = "Edit";
@@ -327,13 +432,21 @@ export default {
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
-
     deleteItem(item) {
       const index = this.items.indexOf(item);
       confirm("Are you sure you want to delete this item?") &&
-        this.items.splice(index, 1);
+        this.$http.delete(`${URL}/delete/rule/${item.id}`)
+        .then(res => {
+          if(res.status === 200) {
+            this.items.splice(index, 1);
+          }
+        })
+        .catch(err => {
+          if(err) {
+            this.error = "Can't connect to the server"
+          }
+        })
     },
-
     close() {
       this.dialog = false;
 
@@ -351,6 +464,7 @@ export default {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
         this.method = "New";
+        this.error = "";
       }, 300);
     },
     save() {
@@ -367,18 +481,57 @@ export default {
       } else if (this.editedItem.status === null) {
         this.error = "Must select the status";
       } else if (this.editedIndex > -1) {
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-      } else {
-        this.items.push({
-          customer: this.editedItem.customer,
-          device: this.editedItem.device,
+        this.$http.patch(`${URL}/patch/rule/${this.editedItem.id}`, {
+          device_id: this.editedItem.device,
           variable: this.editedItem.variable,
           max: this.editedItem.max,
           min: this.editedItem.min,
           status: this.editedItem.status
-        });
-        this.error = "";
-        this.close();
+        }, {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(res => {
+          if(res.status === 200) {
+            Object.assign(this.items[this.editedIndex], this.editedItem);
+            this.error = ""
+            this.close();
+          }
+        })
+        .catch(err => {
+          if(err) {
+            this.error = "Can't connect to the server"
+          }
+        })
+        
+      } else {
+        this.loadingApi = true
+        this.$http.post(`${URL}/post/rule`, {
+          device_id: this.editedItem.device,
+          variable: this.editedItem.variable,
+          max: this.editedItem.max,
+          min: this.editedItem.min,
+          status: this.editedItem.status
+        }, {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(res => {
+          if(res.status === 200) {
+            this.getRules();
+            this.loadingApi = false
+            this.error = "";
+            this.close();
+          }
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        })
+        
       }
     }
   }
