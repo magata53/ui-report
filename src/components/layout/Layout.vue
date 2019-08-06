@@ -59,7 +59,7 @@ data() {
       },
       {
         title: "Scheduler",
-        icon: "scedule",
+        icon: "schedule",
         link: "/scheduler"
       },
       {

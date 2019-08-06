@@ -287,7 +287,7 @@ export default {
   computed: {
     formTitle() {
       return this.editedIndex === -1
-        ? "Create New Scheduler "
+        ? "Create New Rules "
         : `${this.method} ${this.editedItem.telemetry}`;
     },
   },

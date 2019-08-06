@@ -1,6 +1,6 @@
 <template>
   <v-layout align-center justify-center fill-height column max-width="100%">
-      <!-- Dialog loading for wait response from API -->
+    <!-- Dialog loading for wait response from API -->
     <v-dialog v-model="loadingApi" hide-overlay persistent width="300">
       <v-card color="primary" dark>
         <v-card-text>
@@ -64,7 +64,13 @@
                       <v-flex xs4 align-self-center>Customer</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
                       <v-flex xs4>
-                        <v-select v-model="editedItem.customer" :items="listCustomer" @change="onChangeCustomer" item-text="name" item-value="id"></v-select>
+                        <v-select
+                          v-model="editedItem.customer"
+                          :items="listCustomer"
+                          @change="onChangeCustomer"
+                          item-text="name"
+                          item-value="id"
+                        ></v-select>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -73,7 +79,13 @@
                       <v-flex xs4 align-self-center>Device</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
                       <v-flex xs4 align-self-center>
-                        <v-select v-model="editedItem.device" :items="listDevice" @change="onChangeDevice" item-text="name" item-value="id"></v-select>
+                        <v-select
+                          v-model="editedItem.device"
+                          :items="listDevice"
+                          @change="onChangeDevice"
+                          item-text="name"
+                          item-value="id"
+                        ></v-select>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -160,7 +172,7 @@
                       </v-flex>
                     </v-layout>
                   </v-flex>
-                  <v-flex xs12 v-if="editedItem.category === 'Weekly'">
+                  <v-flex xs12 v-if="editedItem.category === 'weekly'">
                     <v-layout>
                       <v-flex xs4 align-self-center>Day</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
@@ -170,7 +182,7 @@
                             <v-checkbox
                               v-model="editedItem.day"
                               label="Sunday"
-                              value="Sunday"
+                              value="0"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -178,7 +190,7 @@
                             <v-checkbox
                               v-model="editedItem.day"
                               label="Monday"
-                              value="Monday"
+                              value="1"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -186,7 +198,7 @@
                             <v-checkbox
                               v-model="editedItem.day"
                               label="Tuesday"
-                              value="Tuesday"
+                              value="2"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -194,7 +206,7 @@
                             <v-checkbox
                               v-model="editedItem.day"
                               label="Wednesday"
-                              value="Wednesday"
+                              value="3"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -202,7 +214,7 @@
                             <v-checkbox
                               v-model="editedItem.day"
                               label="Thursday"
-                              value="Thursday"
+                              value="4"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -210,7 +222,7 @@
                             <v-checkbox
                               v-model="editedItem.day"
                               label="Friday"
-                              value="Friday"
+                              value="5"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -218,7 +230,7 @@
                             <v-checkbox
                               v-model="editedItem.day"
                               label="Saturday"
-                              value="Saturday"
+                              value="6"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -226,7 +238,7 @@
                       </v-flex>
                     </v-layout>
                   </v-flex>
-                  <v-flex xs12 v-else-if="editedItem.category === 'Monthly'">
+                  <v-flex xs12 v-else-if="editedItem.category === 'monthly'">
                     <v-layout>
                       <v-flex xs4 align-self-center>Date</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
@@ -256,17 +268,11 @@
                     </v-layout>
                   </v-flex>
                   <v-flex xs12>
-                      <v-layout>
+                    <v-layout>
                       <v-flex xs4 align-self-center>Activation</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
                       <v-flex xs4>
-                         <v-switch
-                      v-model="editedItem.activation"
-                      true-value="1"
-                      false-value="0"
-                      label="Activation"
-                      color="success"
-                    ></v-switch>
+                        <v-switch v-model="editedItem.activation" color="success"></v-switch>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -293,7 +299,7 @@
                       <v-flex xs4 align-self-center>Category</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
                       <v-flex xs4>
-                        <v-select v-model="editedItem.category" :items="listCategoryForm"></v-select>
+                        <v-select v-model="editedItem.category" :items="listCategoryForm" @change="onChangeCategory"></v-select>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -307,7 +313,7 @@
                           v-model="menuTime"
                           :close-on-content-click="false"
                           :nudge-right="40"
-                          :return-value.sync="editedItem.time"
+                          :return-value.sync="editedItem.set_time"
                           lazy
                           transition="scale-transition"
                           offset-y
@@ -317,7 +323,7 @@
                         >
                           <template v-slot:activator="{ on }">
                             <v-text-field
-                              v-model="editedItem.time"
+                              v-model="editedItem.set_time"
                               label="Set time"
                               append-outer-icon="access_time"
                               readonly
@@ -326,16 +332,16 @@
                           </template>
                           <v-time-picker
                             v-if="menuTime"
-                            v-model="editedItem.time"
+                            v-model="editedItem.set_time"
                             full-width
                             format="24hr"
-                            @click:minute="$refs.menuTime.save(editedItem.time)"
+                            @click:minute="$refs.menuTime.save(editedItem.set_time)"
                           ></v-time-picker>
                         </v-menu>
                       </v-flex>
                     </v-layout>
                   </v-flex>
-                  <v-flex xs12 v-if="editedItem.category === 'Weekly'">
+                  <v-flex xs12 v-if="editedItem.category === 'weekly'">
                     <v-layout>
                       <v-flex xs4 align-self-center>Day</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
@@ -343,57 +349,57 @@
                         <v-layout wrap>
                           <v-flex xs6>
                             <v-checkbox
-                              v-model="editedItem.day"
+                              v-model="editedItem.repeat"
                               label="Sunday"
-                              value="Sunday"
+                              value="0"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
                           <v-flex xs6>
                             <v-checkbox
-                              v-model="editedItem.day"
+                              v-model="editedItem.repeat"
                               label="Monday"
-                              value="Monday"
+                              value="1"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
                           <v-flex xs6>
                             <v-checkbox
-                              v-model="editedItem.day"
+                              v-model="editedItem.repeat"
                               label="Tuesday"
-                              value="Tuesday"
+                              value="2"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
                           <v-flex xs6>
                             <v-checkbox
-                              v-model="editedItem.day"
+                              v-model="editedItem.repeat"
                               label="Wednesday"
-                              value="Wednesday"
+                              value="3"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
                           <v-flex xs6>
                             <v-checkbox
-                              v-model="editedItem.day"
+                              v-model="editedItem.repeat"
                               label="Thursday"
-                              value="Thursday"
+                              value="4"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
                           <v-flex xs6>
                             <v-checkbox
-                              v-model="editedItem.day"
+                              v-model="editedItem.repeat"
                               label="Friday"
-                              value="Friday"
+                              value="5"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
                           <v-flex xs6>
                             <v-checkbox
-                              v-model="editedItem.day"
+                              v-model="editedItem.repeat"
                               label="Saturday"
-                              value="Saturday"
+                              value="6"
                               color="success"
                             ></v-checkbox>
                           </v-flex>
@@ -401,7 +407,7 @@
                       </v-flex>
                     </v-layout>
                   </v-flex>
-                  <v-flex xs12 v-else-if="editedItem.category === 'Monthly'">
+                  <v-flex xs12 v-else-if="editedItem.category === 'monthly'">
                     <v-layout>
                       <v-flex xs4 align-self-center>Category</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
@@ -418,14 +424,14 @@
                         >
                           <template v-slot:activator="{ on }">
                             <v-text-field
-                              v-model="editedItem.date"
+                              v-model="editedItem.repeat"
                               label="Set date"
                               append-outer-icon="event"
                               readonly
                               v-on="on"
                             ></v-text-field>
                           </template>
-                          <v-date-picker v-model="editedItem.date" @input="menuDate = false"></v-date-picker>
+                          <v-date-picker v-model="editedItem.repeat" @input="menuDate = false"></v-date-picker>
                         </v-menu>
                       </v-flex>
                     </v-layout>
@@ -435,13 +441,7 @@
                       <v-flex xs4 align-self-center>Activation</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
                       <v-flex xs4>
-                         <v-switch
-                      v-model="editedItem.activation"
-                      true-value="1"
-                      false-value="0"
-                      label="Activation"
-                      color="success"
-                    ></v-switch>
+                        <v-switch v-model="editedItem.activation" color="success"></v-switch>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -462,7 +462,7 @@
                     <v-layout>
                       <v-flex xs4>Device Name</v-flex>
                       <v-flex xs2>:</v-flex>
-                      <v-flex xs4>{{editedItem.deviceName}}</v-flex>
+                      <v-flex xs4>{{editedItem.device.name}}</v-flex>
                     </v-layout>
                   </v-flex>
                   <v-flex xs12>
@@ -476,23 +476,23 @@
                     <v-layout>
                       <v-flex xs4>Time</v-flex>
                       <v-flex xs2>:</v-flex>
-                      <v-flex xs4>{{editedItem.time}}</v-flex>
+                      <v-flex xs4>{{editedItem.set_time}}</v-flex>
                     </v-layout>
                   </v-flex>
-                  <v-flex xs12 v-if="editedItem.category === 'Weekly'">
+                  <v-flex xs12 v-if="editedItem.category === 'weekly'">
                     <v-layout>
-                      <v-flex xs4>Days</v-flex>
+                      <v-flex xs4>Repeat</v-flex>
                       <v-flex xs2>:</v-flex>
                       <v-flex xs4>
-                        <span v-for="(item,index) in editedItem.day" :key="index">{{item}}</span>
+                        <span>{{editedItem.repeat.toString()}}</span>
                       </v-flex>
                     </v-layout>
                   </v-flex>
-                  <v-flex xs12 v-else-if="editedItem.category === 'Monthly'">
+                  <v-flex xs12 v-else-if="editedItem.category === 'monthly'">
                     <v-layout>
-                      <v-flex xs4>Start Date</v-flex>
+                      <v-flex xs4>Repeat</v-flex>
                       <v-flex xs2>:</v-flex>
-                      <v-flex xs4>{{editedItem.date}}</v-flex>
+                      <v-flex xs4>{{editedItem.repeat}}</v-flex>
                     </v-layout>
                   </v-flex>
                   <v-flex xs12>
@@ -500,8 +500,8 @@
                       <v-flex xs4>Activation</v-flex>
                       <v-flex xs2>:</v-flex>
                       <v-flex xs4>
-                        <span color="success" v-if="editedItem.activation === '1'">ON</span>
-                        <span color="error" v-else-if="editedItem.activation === '0'">OFF</span>
+                        <span color="success" v-if="editedItem.activation === true">ON</span>
+                        <span color="error" v-else>OFF</span>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -563,14 +563,15 @@
 </template>
 
 <script>
-const URL_REPORT = `http://192.168.0.70:5005/api/get/report`
-// const URL_SCHEDULER = ``
+const URL = `http://192.168.0.16:5006/api`;
+
 export default {
   name: "scheduler",
   data: () => ({
+    tmpTokenDevice: "",
     loadingApi: false,
     selectedCategory: null,
-    error: '',
+    error: "",
     menuDate: false,
     menuTime: false,
     loading: false,
@@ -582,9 +583,9 @@ export default {
         sortable: false
       },
       { text: "Scheduler Name", value: "name", sortable: false },
-      { text: "Device Name", value: "deviceName", sortable: false },
+      { text: "Device Name", value: "device.name", sortable: false },
       { text: "Type", value: "type", sortable: false },
-      { text: "Value", value: "value", sortable: false },
+      { text: "Value", value: "type_value", sortable: false },
       { text: "Category", value: "category", sortable: false },
       { text: "Activation", value: "activation", sortable: false },
       { text: "Actions", value: "device", sortable: false }
@@ -603,7 +604,7 @@ export default {
       time: "",
       day: [],
       date: "",
-      activation: "1"
+      activation: true
     },
     defaultItem: {
       name: "",
@@ -617,52 +618,60 @@ export default {
       time: "",
       day: [],
       date: "",
-      activation: "1"
+      activation: true
     },
-    listCustomer:[{name: "Select", id: null},],
-    listDevice:[{name: "Select", id: null},],
-    listTelemetry:[{text: "Select", value: null},],
-    listType:[{text: "Select", value: null}, {text: "control", value: "control"}, {text: "on/off", value: "on/off"}],
-    listValue:[{text: "Select", value: null}, {text: "ON", value: 1}, {text: "OFF", value: 0}],
+    listCustomer: [{ name: "Select", id: null }],
+    listDevice: [{ name: "Select", id: null }],
+    listTelemetry: [{ text: "Select", value: null }],
+    listType: [
+      { text: "Select", value: null },
+      { text: "control", value: "control" },
+      { text: "on/off", value: "on/off" }
+    ],
+    listValue: [
+      { text: "Select", value: null },
+      { text: "ON", value: "on" },
+      { text: "OFF", value: "off" }
+    ],
     listCategory: [
       { text: "All", value: null },
-      { text: "Daily", value: "Daily" },
-      { text: "Weekly", value: "Weekly" },
-      { text: "Monthly", value: "Monthly" }
+      { text: "Daily", value: "daily" },
+      { text: "Weekly", value: "weekly" },
+      { text: "Monthly", value: "monthly" }
     ],
     listCategoryForm: [
       { text: "Select", value: null },
-      { text: "Daily", value: "Daily" },
-      { text: "Weekly", value: "Weekly" },
-      { text: "Monthly", value: "Monthly" }
-    ],
+      { text: "Daily", value: "daily" },
+      { text: "Weekly", value: "weekly" },
+      { text: "Monthly", value: "monthly" }
+    ]
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1
         ? "Create New Scheduler "
-        : `${this.method} ${this.editedItem.deviceName}`;
+        : `${this.method} ${this.editedItem.device.name}`;
     },
     deviceName() {
-        let deviceName = ''
-        for(let y = 0; y < this.listDevice.length; y++) {
-            if(this.editedItem.device === this.listDevice[y].id) {
-               deviceName = this.listDevice[y].name
-               break
-            }
+      let deviceName = "";
+      for (let y = 0; y < this.listDevice.length; y++) {
+        if (this.editedItem.device === this.listDevice[y].id) {
+          deviceName = this.listDevice[y].name;
+          break;
         }
-        return deviceName
+      }
+      return deviceName;
     },
     customerName() {
-        let customerName = ''
-        for(let z = 0; z < this.listCustomer.length; z++) {
-            if(this.editedItem.customer === this.listCustomer[z].id) {
-               customerName = this.listCustomer[z].name
-               break
-            }
+      let customerName = "";
+      for (let z = 0; z < this.listCustomer.length; z++) {
+        if (this.editedItem.customer === this.listCustomer[z].id) {
+          customerName = this.listCustomer[z].name;
+          break;
         }
-        return customerName
+      }
+      return customerName;
     },
   },
 
@@ -674,19 +683,19 @@ export default {
 
   mounted() {
     this.loading = true;
-    
 
     setTimeout(() => {
       this.loading = false;
       this.getCustomer();
+      this.getScheduler();
     }, 300);
   },
 
   methods: {
-     getCustomer() {
+    getCustomer() {
       this.$http
         .post(
-          `${URL_REPORT}/customerList`,
+          `${URL}/get/scheduler/customerList`,
           { token: "Bearer " + this.$cookies.get("token") },
           {
             headers: {
@@ -706,12 +715,12 @@ export default {
         });
     },
     getDevice(val) {
-        this.listDevice = [{name: "Select", id: null},]
+      this.listDevice = [{ name: "Select", id: null }];
       this.editedItem.device = null;
       this.loadingApi = true;
       this.$http
         .post(
-          `${URL_REPORT}/customerDevices`,
+          `${URL}/get/scheduler/customerDevices`,
           { customer: val, token: "Bearer " + this.$cookies.get("token") },
           {
             headers: {
@@ -732,13 +741,17 @@ export default {
         });
     },
     getTelemetry(val) {
-        this.listTelemetry = [{text: "Select", value: null},]
+      this.listTelemetry = [{ text: "Select", value: null }];
       this.editedItem.telemetry = null;
       this.loadingApi = true;
       this.$http
         .post(
-          `${URL_REPORT}/attributes`,
-          { entityId: val, token: "Bearer " + this.$cookies.get("token"), entityType: "DEVICE" },
+          `${URL}/get/scheduler/attributes`,
+          {
+            entityId: val,
+            token: "Bearer " + this.$cookies.get("token"),
+            entityType: "DEVICE"
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -757,17 +770,75 @@ export default {
           }
         });
     },
-     onChangeCustomer(val) {
+    getScheduler() {
+      this.$http
+        .get(`${URL}/get/scheduler`)
+        .then(res => {
+          if (res.status === 200) {
+            this.items = res.data;
+          }
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    getTokenDevice(val) {
+      this.$http
+        .post(
+          `${URL}/get/scheduler/token_device`,
+          { deviceId: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        )
+        .then(res => {
+          this.tmpTokenDevice = res.data.token_device;
+        })
+        .catch(err => {
+          if (err) {
+            this.error = "Can't connect to the server";
+          }
+        });
+    },
+    onChangeCustomer(val) {
       this.getDevice(val);
     },
     onChangeDevice(val) {
-      this.getTelemetry(val)
+      this.getTelemetry(val);
+      this.getTokenDevice(val);
     },
-
+    onChangeCategory(val) {
+      if(val === "weekly") {
+        this.editedItem.repeat = []
+      } else {
+        this.editedItem = ""
+      }
+    },
     editItem(item) {
       this.method = "Edit";
       this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      if(item.category === "weekly") {
+        this.editedItem = Object.assign({}, {
+            id: item.id,
+            device: item.device,
+            name: item.name,
+            category: item.category,
+            repeat: item.repeat.split(","),
+            set_time: item.set_time,
+            activation: item.activation,
+            token_device: item.token_device,
+            type: item.type,
+            type_value: item.type_value,
+            telemetry: item.telemetry
+      });
+      } else {
+        this.editedItem = Object.assign({}, item)
+      }
+      
       this.dialog = true;
     },
     detailItem(item) {
@@ -780,22 +851,32 @@ export default {
     deleteItem(item) {
       const index = this.items.indexOf(item);
       confirm("Are you sure you want to delete this item?") &&
-        this.items.splice(index, 1);
+        this.$http
+          .delete(`${URL}/delete/scheduler/${item.id}`)
+          .then(res => {
+            if (res.status === 200) {
+              this.items.splice(index, 1);
+            }
+          })
+          .catch(err => {
+            if (err) {
+              this.error = "Can't connect to the server";
+            }
+          });
     },
-
     close() {
       this.dialog = false;
-     
+
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
         this.method = "New";
-        this.error = ''
+        this.error = "";
       }, 300);
     },
     close1() {
       this.dialog = false;
-      
+
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
@@ -803,67 +884,255 @@ export default {
       }, 300);
     },
     save() {
-      if(this.editedItem.name === '') {
-        this.error = "Scheduler name cannot be empty"
-      } else if(this.editedItem.device_name === null) {
-        this.error = "Device name cannot be empty"
-      } else if(this.editedItem.category === null) {
-        this.error = "Must select the category"
-      } else if(this.editedItem.time === '' && this.editedItem.date === '' && this.editedItem.day.length === 0) {
-        this.error = "Time or day or date cannot be empty"
+      if (this.editedItem.name === "") {
+        this.error = "Scheduler name cannot be empty";
+      } else if (this.editedItem.device === null) {
+        this.error = "Must select the device";
+      } else if (this.editedItem.telemetry === null) {
+        this.error = "Must select the telemetry";
+      } else if (this.editedItem.type === null) {
+        this.error = "Must select the type";
+      } else if (this.editedItem.value === null) {
+        this.error = "Value cannot be empty";
+      } else if (this.editedItem.category === null) {
+        this.error = "Must select the category";
+      } else if (
+        this.editedItem.time === "" &&
+        this.editedItem.date === "" &&
+        this.editedItem.day.length === 0
+      ) {
+        this.error = "Time or day or date cannot be empty";
       } else if (this.editedIndex > -1) {
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.error = ''
+        this.$http
+          .patch(`${URL}/patch/scheduler/${this.editedItem.id}`, {
+            device_id: this.editedItem.device.id,
+            device_name: this.editedItem.device.name,
+            scheduler_name: this.editedItem.name,
+            category: this.editedItem.category,
+            repeat: this.editedItem.repeat.toString(),
+            set_time: this.editedItem.set_time,
+            activation: this.editedItem.activation,
+            token_device: this.editedItem.token_device,
+            type: this.editedItem.type,
+            type_value: this.editedItem.type_value,
+            telemetry: this.editedItem.telemetry
+          })
+          .then(res => {
+            if (res.status === 200) {
+              this.getScheduler();
+              this.error = "";
+              this.close();
+            }
+          })
+          .catch(err => {
+            if (err) {
+              this.error = "Can't connect to the server";
+            }
+          });
+      } else if (this.editedItem.category === "daily") {
+        this.$http
+          .post(
+            `${URL}/post/scheduler`,
+            {
+              device_id: this.editedItem.device,
+              device_name: this.deviceName,
+              scheduler_name: this.editedItem.name,
+              category: this.editedItem.category,
+              repeat: "",
+              set_time: this.editedItem.time,
+              activation: this.editedItem.activation,
+              token_device: this.tmpTokenDevice,
+              type: this.editedItem.type,
+              type_value: this.editedItem.value,
+              telemetry: this.editedItem.telemetry
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(res => {
+            if (res.status === 200) {
+              this.$http
+                .post(
+                  `${URL}/set/scheduler`,
+                  {
+                    scheduler_id: res.data.id,
+                    device_id: this.editedItem.device,
+                    device_name: this.deviceName,
+                    scheduler_name: this.editedItem.name,
+                    category: this.editedItem.category,
+                    repeat: "",
+                    set_time: this.editedItem.time,
+                    activation: this.editedItem.activation,
+                    token_device: this.tmpTokenDevice,
+                    type: this.editedItem.type,
+                    type_value: this.editedItem.value,
+                    telemetry: this.editedItem.telemetry
+                  },
+                  {
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                  }
+                )
+                .then(res => {
+                  if (res.status === 200) {
+                    this.getScheduler();
+                    this.error = "";
+                    this.close();
+                  }
+                })
+                .catch(err => {
+                  if(err) {
+                    this.error = "Can't connect to the server";
+                  }
+                });
+            }
+          })
+          .catch(err => {
+            if(err) {
+              this.error = "Can't connect to the server";
+            }
+          });
+      } else if (this.editedItem.category === "weekly") {
+        this.$http
+          .post(
+            `${URL}/post/scheduler`,
+            {
+              device_id: this.editedItem.device,
+              device_name: this.deviceName,
+              scheduler_name: this.editedItem.name,
+              category: this.editedItem.category,
+              repeat: this.editedItem.day.toString(),
+              set_time: this.editedItem.time,
+              activation: this.editedItem.activation,
+              token_device: this.tmpTokenDevice,
+              type: this.editedItem.type,
+              type_value: this.editedItem.value,
+              telemetry: this.editedItem.telemetry
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(res => {
+            if (res.status === 200) {
+              this.$http
+                .post(
+                  `${URL}/set/scheduler`,
+                  {
+                    scheduler_id: res.data.id,
+                    device_id: this.editedItem.device,
+                    device_name: this.deviceName,
+                    scheduler_name: this.editedItem.name,
+                    category: this.editedItem.category,
+                    repeat: this.editedItem.day.toString(),
+                    set_time: this.editedItem.time,
+                    activation: this.editedItem.activation,
+                    token_device: this.tmpTokenDevice,
+                    type: this.editedItem.type,
+                    type_value: this.editedItem.value,
+                    telemetry: this.editedItem.telemetry
+                  },
+                  {
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                  }
+                )
+                .then(res => {
+                  if (res.status === 200) {
+                    this.getScheduler();
+                    this.error = "";
+                    this.close();
+                  }
+                })
+                .catch(err => {
+                  if(err) {
+                    this.error = "Can't connect to the server";
+                  }
+                });
+            }
+          })
+          .catch(err => {
+            if(err) {
+              this.error = "Can't connect to the server";
+            }
+          });
+        this.error = "";
         this.close();
-      } else if (this.editedItem.category === "Daily"){
-        this.items.push({
-          name: this.editedItem.name,
-          customer: this.customerName,
-          device: this.editedItem.device,
-          deviceName: this.deviceName,
-          telemetry: this.editedItem.telemetry,
-          type: this.editedItem.type,
-          value: this.editedItem.value,
-          category: this.editedItem.category,
-          time: this.editedItem.time,
-          activation: this.editedItem.activation
-        });
-        this.error = ''
-        this.close();
-      } else if(this.editedItem.category === "Weekly") {
-        this.items.push({
-          name: this.editedItem.name,
-          customer: this.customerName,
-          device: this.editedItem.device,
-          deviceName: this.deviceName,
-          telemetry: this.editedItem.telemetry,
-          type: this.editedItem.type,
-          value: this.editedItem.value,
-          category: this.editedItem.category,
-          time: this.editedItem.time,
-          day: this.editedItem.day,
-          activation: this.editedItem.activation
-        });
-        this.error = ''
-        this.close();
-      } else if(this.editedItem.category === "Monthly") {
-        this.items.push({
-          name: this.editedItem.name,
-          customer: this.customerName,
-          device: this.editedItem.device,
-          deviceName: this.deviceName,
-          telemetry: this.editedItem.telemetry,
-          type: this.editedItem.type,
-          value: this.editedItem.value,
-          category: this.editedItem.category,
-          time: this.editedItem.time,
-          date: this.editedItem.date,
-          activation: this.editedItem.activation
-        });
-        this.error = ''
-        this.close();
-      } 
-      
+      } else if (this.editedItem.category === "monthly") {
+        this.$http
+          .post(
+            `${URL}/post/scheduler`,
+            {
+              device_id: this.editedItem.device,
+              device_name: this.deviceName,
+              scheduler_name: this.editedItem.name,
+              category: this.editedItem.category,
+              repeat: this.editedItem.date,
+              set_time: this.editedItem.time,
+              activation: this.editedItem.activation,
+              token_device: this.tmpTokenDevice,
+              type: this.editedItem.type,
+              type_value: this.editedItem.value,
+              telemetry: this.editedItem.telemetry
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(res => {
+            if (res.status === 200) {
+              this.$http
+                .post(
+                  `${URL}/set/scheduler`,
+                  {
+                    scheduler_id: res.data.id,
+                    device_id: this.editedItem.device,
+                    device_name: this.deviceName,
+                    scheduler_name: this.editedItem.name,
+                    category: this.editedItem.category,
+                    repeat: this.editedItem.date,
+                    set_time: this.editedItem.time,
+                    activation: this.editedItem.activation,
+                    token_device: this.tmpTokenDevice,
+                    type: this.editedItem.type,
+                    type_value: this.editedItem.value,
+                    telemetry: this.editedItem.telemetry
+                  },
+                  {
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                  }
+                )
+                .then(res => {
+                  if (res.status === 200) {
+                    this.getScheduler();
+                    this.error = "";
+                    this.close();
+                  }
+                })
+                .catch(err => {
+                  if(err) {
+                    this.error = "Can't connect to the server";
+                  }
+                });
+            }
+          })
+          .catch(err => {
+            if (err) {
+              this.error = "Can't connect to the server";
+            }
+          });
+      }
     }
   }
 };
