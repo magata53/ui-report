@@ -98,7 +98,7 @@
 </template>
 
 <script>
-const URL = `http://192.168.0.16:5006/api`
+const URL = `http://${window.location.host}:5006/api`
   export default {
     name: "calendar",
     data: () => ({

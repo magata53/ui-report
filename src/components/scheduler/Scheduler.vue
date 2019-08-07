@@ -542,14 +542,14 @@
         <template v-slot:items="props">
           <td class="text-xs-left">{{ props.index + 1}}</td>
           <td class="text-xs-left">{{ props.item.name }}</td>
-          <td class="text-xs-left">{{ props.item.deviceName }}</td>
+          <td class="text-xs-left">{{ props.item.device.name }}</td>
           <td class="text-xs-left">{{ props.item.type }}</td>
-          <td class="text-xs-left">{{ props.item.value }}</td>
+          <td class="text-xs-left">{{ props.item.type_value }}</td>
           <td class="text-xs-left">{{ props.item.category }}</td>
 
           <td class="text-xs-left">
-            <v-btn color="success" v-if="props.item.activation === '1'" small>ON</v-btn>
-            <v-btn color="error" v-else-if="props.item.activation === '0'" small>OFF</v-btn>
+            <v-btn color="success" v-if="props.item.activation === true" small>ON</v-btn>
+            <v-btn color="error" v-else-if="props.item.activation === false" small>OFF</v-btn>
           </td>
           <td class="text-xs-left">
             <v-icon class="mr-2" @click="detailItem(props.item)" color="primary">info</v-icon>
@@ -563,7 +563,7 @@
 </template>
 
 <script>
-const URL = `http://192.168.0.16:5006/api`;
+const URL = `http://${window.location.host}:5006/api`;
 
 export default {
   name: "scheduler",
@@ -733,9 +733,11 @@ export default {
             this.listDevice.push(res.data[j]);
           }
           this.loadingApi = false;
+          this.error = "";
         })
         .catch(err => {
           if (err) {
+            this.loadingApi = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -763,9 +765,11 @@ export default {
             this.listTelemetry.push(res.data[k]);
           }
           this.loadingApi = false;
+          this.error = "";
         })
         .catch(err => {
           if (err) {
+            this.loadingApi = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -797,6 +801,7 @@ export default {
         )
         .then(res => {
           this.tmpTokenDevice = res.data.token_device;
+          this.error = "";
         })
         .catch(err => {
           if (err) {
@@ -856,6 +861,7 @@ export default {
           .then(res => {
             if (res.status === 200) {
               this.items.splice(index, 1);
+              this.error = "";
             }
           })
           .catch(err => {
@@ -903,6 +909,7 @@ export default {
       ) {
         this.error = "Time or day or date cannot be empty";
       } else if (this.editedIndex > -1) {
+        this.loadingApi = true;
         this.$http
           .patch(`${URL}/patch/scheduler/${this.editedItem.id}`, {
             device_id: this.editedItem.device.id,
@@ -920,16 +927,19 @@ export default {
           .then(res => {
             if (res.status === 200) {
               this.getScheduler();
+              this.loadingApi = false;
               this.error = "";
               this.close();
             }
           })
           .catch(err => {
             if (err) {
+              this.loadingApi = false;
               this.error = "Can't connect to the server";
             }
           });
       } else if (this.editedItem.category === "daily") {
+        this.loadingApi = true;
         this.$http
           .post(
             `${URL}/post/scheduler`,
@@ -979,6 +989,7 @@ export default {
                 )
                 .then(res => {
                   if (res.status === 200) {
+                    this.loadingApi = false;
                     this.getScheduler();
                     this.error = "";
                     this.close();
@@ -986,6 +997,7 @@ export default {
                 })
                 .catch(err => {
                   if(err) {
+                    this.loadingApi = false;
                     this.error = "Can't connect to the server";
                   }
                 });
@@ -993,10 +1005,12 @@ export default {
           })
           .catch(err => {
             if(err) {
+              this.loadingApi = false;
               this.error = "Can't connect to the server";
             }
           });
       } else if (this.editedItem.category === "weekly") {
+        this.loadingApi = true;
         this.$http
           .post(
             `${URL}/post/scheduler`,
@@ -1046,6 +1060,7 @@ export default {
                 )
                 .then(res => {
                   if (res.status === 200) {
+                    this.loadingApi = false;
                     this.getScheduler();
                     this.error = "";
                     this.close();
@@ -1053,6 +1068,7 @@ export default {
                 })
                 .catch(err => {
                   if(err) {
+                    this.loadingApi = false;
                     this.error = "Can't connect to the server";
                   }
                 });
@@ -1060,12 +1076,14 @@ export default {
           })
           .catch(err => {
             if(err) {
+              this.loadingApi = false;
               this.error = "Can't connect to the server";
             }
           });
         this.error = "";
         this.close();
       } else if (this.editedItem.category === "monthly") {
+        this.loadingApi = true;
         this.$http
           .post(
             `${URL}/post/scheduler`,
@@ -1115,6 +1133,7 @@ export default {
                 )
                 .then(res => {
                   if (res.status === 200) {
+                    this.loadingApi = false;
                     this.getScheduler();
                     this.error = "";
                     this.close();
@@ -1122,6 +1141,7 @@ export default {
                 })
                 .catch(err => {
                   if(err) {
+                    this.loadingApi = false;
                     this.error = "Can't connect to the server";
                   }
                 });
@@ -1129,6 +1149,7 @@ export default {
           })
           .catch(err => {
             if (err) {
+              this.loadingApi = false;
               this.error = "Can't connect to the server";
             }
           });

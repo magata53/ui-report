@@ -368,7 +368,7 @@
 
 <script>
 import fileDownload from "js-file-download";
-const URL = `http://192.168.0.70:5005/api/get/report`;
+const URL = `http://${window.location.host}:5005/api/get/report`;
 const MILLISECONDS_TO_MINUTES = 6000;
 
 export default {
@@ -470,6 +470,7 @@ export default {
         })
         .catch(err => {
           if (err) {
+            this.loading = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -496,6 +497,7 @@ export default {
         })
         .catch(err => {
           if (err) {
+            this.loading = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -522,6 +524,7 @@ export default {
         })
         .catch(err => {
           if (err) {
+            this.loading = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -548,6 +551,7 @@ export default {
         })
         .catch(err => {
           if (err) {
+            this.loading = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -686,10 +690,12 @@ export default {
               this.loading = false;
               this.form = Object.assign({}, this.default);
               this.error = "";
+              this.step = 1;
             }
           })
           .catch(err => {
             if (err) {
+              this.loading = false;
               this.error = "Can't connect to the server";
             }
           });

@@ -17,6 +17,9 @@
             <v-toolbar-title>Login</v-toolbar-title>
           </v-toolbar>
           <v-card-text>
+            <v-layout align-center justify-center v-if="error">
+              <p class="error--text">{{error}}</p>
+            </v-layout>
             <v-form>
               <v-text-field
                 prepend-icon="person"
@@ -46,7 +49,7 @@
 </template>
 
 <script>
-const URL = `http://192.168.0.16:5005/api/get/report`;
+const URL = `http://${window.location.host}:5005/api/get/report`;
 export default {
   name: "login",
   data() {
@@ -82,7 +85,11 @@ export default {
           this.$router.push({ path: "/reports" });
         })
         .catch(err => {
-          if (err) {
+          if (err.response.status === 401) {
+            this.loading = false;
+            this.error = "Username or password wrong";
+          } else {
+            this.loading = false;
             this.error = "Can't connect to the server";
           }
         });

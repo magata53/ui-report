@@ -221,8 +221,8 @@
       <template v-slot:items="props">
         <td class="text-xs-left">{{ props.index + 1}}</td>
         <td class="text-xs-left">{{ props.item.telemetry }}</td>
-        <td class="text-xs-left">{{ props.item.min }}</td>
         <td class="text-xs-left">{{ props.item.max }}</td>
+        <td class="text-xs-left">{{ props.item.min }}</td>
         <td class="text-xs-left">
           <span class="green--text" v-if="props.item.status === 3">normal</span>
           <span class="yellow--text" v-else-if="props.item.status === 2">minor</span>
@@ -240,7 +240,7 @@
 </template>
 
 <script>
-const URL = `http://192.168.0.70:5005/api`;
+const URL = `http://${window.location.host}:5005/api`;
 export default {
   name: "rules",
   data: () => ({
@@ -354,6 +354,7 @@ export default {
         })
         .catch(err => {
           if (err) {
+            this.loadingApi = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -380,6 +381,7 @@ export default {
         })
         .catch(err => {
           if (err) {
+            this.loadingApi = false;
             this.error = "Can't connect to the server";
           }
         });
@@ -485,6 +487,7 @@ export default {
       } else if (this.editedItem.status === null) {
         this.error = "Must select the status";
       } else if (this.editedIndex > -1) {
+        this.loadingApi = true;
         this.$http.patch(`${URL}/patch/rule/${this.editedItem.id}`, {
           device_id: this.editedItem.device,
           variable: this.editedItem.telemetry,
@@ -499,12 +502,14 @@ export default {
         .then(res => {
           if(res.status === 200) {
             Object.assign(this.items[this.editedIndex], this.editedItem);
+            this.loadingApi = false;
             this.error = ""
             this.close();
           }
         })
         .catch(err => {
           if(err) {
+            this.loadingApi = false;
             this.error = "Can't connect to the server"
           }
         })
@@ -525,13 +530,14 @@ export default {
         .then(res => {
           if(res.status === 200) {
             this.getRules();
-            this.loadingApi = false
+            this.loadingApi = false;
             this.error = "";
             this.close();
           }
         })
         .catch(err => {
           if (err) {
+            this.loadingApi = false;
             this.error = "Can't connect to the server";
           }
         })
