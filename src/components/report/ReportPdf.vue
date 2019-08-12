@@ -317,7 +317,7 @@
                   <v-text-field v-model="form.report_name" type="text"></v-text-field>
                 </v-flex>
               </v-layout>
-            </v-flex> -->
+            </v-flex>-->
             <v-flex xs12>
               <v-layout>
                 <v-flex xs4 align-self-center>
@@ -430,7 +430,7 @@ export default {
       this.$http
         .post(
           `${URL}/customerList`,
-          { token: "Bearer " + this.$cookies.get("token") },
+          { token: "Bearer " + this.$cookies.get("token").token },
           {
             headers: {
               "Content-Type": "application/json"
@@ -449,13 +449,16 @@ export default {
         });
     },
     getDevice(val) {
-      this.listDevice = [{name: "Select", id: null},]
+      this.listDevice = [{ name: "Select", id: null }];
       this.form.device = null;
       this.loading = true;
       this.$http
         .post(
           `${URL}/customerDevices`,
-          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            customer: val,
+            token: "Bearer " + this.$cookies.get("token").token
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -476,13 +479,16 @@ export default {
         });
     },
     getAsset(val) {
-      this.listAsset = [{name: "Select", id: null},]
+      this.listAsset = [{ name: "Select", id: null }];
       this.form.asset = null;
       this.loading = true;
       this.$http
         .post(
           `${URL}/customerAssets`,
-          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            customer: val,
+            token: "Bearer " + this.$cookies.get("token").token
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -503,13 +509,16 @@ export default {
         });
     },
     getEntityView(val) {
-      this.listEntityView = [{name: "Select", id: null},]
+      this.listEntityView = [{ name: "Select", id: null }];
       this.form.entityView = null;
       this.loading = true;
       this.$http
         .post(
           `${URL}/customerEntityView`,
-          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            customer: val,
+            token: "Bearer " + this.$cookies.get("token").token
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -537,7 +546,7 @@ export default {
           {
             entityType: entityType,
             entityId: val,
-            token: "Bearer " + this.$cookies.get("token")
+            token: "Bearer " + this.$cookies.get("token").token
           },
           {
             headers: {
@@ -620,11 +629,11 @@ export default {
         } else {
           entityId = this.form.entityView;
         }
-        let deviceName = '';
-        for(let t =0; t < this.listDevice.length; t++) {
-          if(entityId === this.listDevice[t].id) {
-            deviceName = this.listDevice[t].name
-            break
+        let deviceName = "";
+        for (let t = 0; t < this.listDevice.length; t++) {
+          if (entityId === this.listDevice[t].id) {
+            deviceName = this.listDevice[t].name;
+            break;
           }
         }
         let body = {
@@ -638,7 +647,7 @@ export default {
           agg: this.form.agg,
           limit: this.form.limit,
           interval: parseInt(this.form.interval) * MILLISECONDS_TO_MINUTES,
-          token: "Bearer " + this.$cookies.get("token"),
+          token: "Bearer " + this.$cookies.get("token").token,
           deviceName: deviceName,
           date: this.form.created_at,
           createdBy: this.form.created_by

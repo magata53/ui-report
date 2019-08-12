@@ -34,6 +34,7 @@
 </template>
 
 <script>
+const jwt = require("jsonwebtoken");
 import ReportPdf from "./ReportPdf.vue";
 import ReportLog from "./ReportLog.vue";
 export default {
@@ -44,8 +45,30 @@ export default {
   },
   data() {
     return {
-      tab: null
+      tab: null,
+      error: ""
     };
+  },
+  mounted() {
+    let userTB = jwt.decode(this.$cookies.get("token").token);
+    this.$http
+      .get(
+        `http://${window.location.host}:8080/api/user/${userTB.userId}/token`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Authorization": `Bearer ${this.$cookies.get("token").token}`
+          }
+        }
+      )
+      .then(res => {
+        this.$cookies.set("token", res.data);
+      })
+      .catch(err => {
+        if (err) {
+          this.error = "Error";
+        }
+      });
   }
 };
 </script>

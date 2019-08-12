@@ -299,7 +299,11 @@
                       <v-flex xs4 align-self-center>Category</v-flex>
                       <v-flex xs2 align-self-center>:</v-flex>
                       <v-flex xs4>
-                        <v-select v-model="editedItem.category" :items="listCategoryForm" @change="onChangeCategory"></v-select>
+                        <v-select
+                          v-model="editedItem.category"
+                          :items="listCategoryForm"
+                          @change="onChangeCategory"
+                        ></v-select>
                       </v-flex>
                     </v-layout>
                   </v-flex>
@@ -563,12 +567,13 @@
 </template>
 
 <script>
+const jwt = require("jsonwebtoken");
 const URL = `http://${window.location.host}:5006/api`;
 
 export default {
   name: "scheduler",
   data: () => ({
-    tmpTokenDevice: "",
+    user: {},
     loadingApi: false,
     selectedCategory: null,
     error: "",
@@ -672,7 +677,7 @@ export default {
         }
       }
       return customerName;
-    },
+    }
   },
 
   watch: {
@@ -682,12 +687,33 @@ export default {
   },
 
   mounted() {
+    let userTB = jwt.decode(this.$cookies.get("token").token);
+    this.$http
+      .get(
+        `http://${window.location.host}:8080/api/user/${userTB.userId}/token`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Authorization": `Bearer ${this.$cookies.get("token").token}`
+          }
+        }
+      )
+      .then(res => {
+        this.$cookies.set("token", res.data);
+      })
+      .catch(err => {
+        if (err) {
+          this.error = "Re-login again";
+        }
+      });
+
     this.loading = true;
 
     setTimeout(() => {
       this.loading = false;
       this.getCustomer();
       this.getScheduler();
+      this.getUser();
     }, 300);
   },
 
@@ -696,7 +722,7 @@ export default {
       this.$http
         .post(
           `${URL}/get/scheduler/customerList`,
-          { token: "Bearer " + this.$cookies.get("token") },
+          { token: "Bearer " + this.$cookies.get("token").token },
           {
             headers: {
               "Content-Type": "application/json"
@@ -721,7 +747,10 @@ export default {
       this.$http
         .post(
           `${URL}/get/scheduler/customerDevices`,
-          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            customer: val,
+            token: "Bearer " + this.$cookies.get("token").token
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -751,7 +780,7 @@ export default {
           `${URL}/get/scheduler/attributes`,
           {
             entityId: val,
-            token: "Bearer " + this.$cookies.get("token"),
+            token: "Bearer " + this.$cookies.get("token").token,
             entityType: "DEVICE"
           },
           {
@@ -788,20 +817,12 @@ export default {
           }
         });
     },
-    getTokenDevice(val) {
+    getUser() {
+      let userTB = jwt.decode(this.$cookies.get("token").token);
       this.$http
-        .post(
-          `${URL}/get/scheduler/token_device`,
-          { deviceId: val, token: "Bearer " + this.$cookies.get("token") },
-          {
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
-        )
+        .get(`${URL}/get/user/${userTB.userId}`)
         .then(res => {
-          this.tmpTokenDevice = res.data.token_device;
-          this.error = "";
+          this.user = res.data[0];
         })
         .catch(err => {
           if (err) {
@@ -814,20 +835,21 @@ export default {
     },
     onChangeDevice(val) {
       this.getTelemetry(val);
-      this.getTokenDevice(val);
     },
     onChangeCategory(val) {
-      if(val === "weekly") {
-        this.editedItem.repeat = []
+      if (val === "weekly") {
+        this.editedItem.repeat = [];
       } else {
-        this.editedItem = ""
+        this.editedItem = "";
       }
     },
     editItem(item) {
       this.method = "Edit";
       this.editedIndex = this.items.indexOf(item);
-      if(item.category === "weekly") {
-        this.editedItem = Object.assign({}, {
+      if (item.category === "weekly") {
+        this.editedItem = Object.assign(
+          {},
+          {
             id: item.id,
             device: item.device,
             name: item.name,
@@ -835,15 +857,15 @@ export default {
             repeat: item.repeat.split(","),
             set_time: item.set_time,
             activation: item.activation,
-            token_device: item.token_device,
             type: item.type,
             type_value: item.type_value,
             telemetry: item.telemetry
-      });
+          }
+        );
       } else {
-        this.editedItem = Object.assign({}, item)
+        this.editedItem = Object.assign({}, item);
       }
-      
+
       this.dialog = true;
     },
     detailItem(item) {
@@ -909,17 +931,18 @@ export default {
       ) {
         this.error = "Time or day or date cannot be empty";
       } else if (this.editedIndex > -1) {
+        let userTB = jwt.decode(this.$cookies.get("token").token);
         this.loadingApi = true;
         this.$http
           .patch(`${URL}/patch/scheduler/${this.editedItem.id}`, {
             device_id: this.editedItem.device.id,
+            userId: userTB.userId,
             device_name: this.editedItem.device.name,
             scheduler_name: this.editedItem.name,
             category: this.editedItem.category,
             repeat: this.editedItem.repeat.toString(),
             set_time: this.editedItem.set_time,
             activation: this.editedItem.activation,
-            token_device: this.editedItem.token_device,
             type: this.editedItem.type,
             type_value: this.editedItem.type_value,
             telemetry: this.editedItem.telemetry
@@ -939,19 +962,20 @@ export default {
             }
           });
       } else if (this.editedItem.category === "daily") {
+        let userTB = jwt.decode(this.$cookies.get("token").token);
         this.loadingApi = true;
         this.$http
           .post(
             `${URL}/post/scheduler`,
             {
               device_id: this.editedItem.device,
+              userId: userTB.userId,
               device_name: this.deviceName,
               scheduler_name: this.editedItem.name,
               category: this.editedItem.category,
               repeat: "",
               set_time: this.editedItem.time,
               activation: this.editedItem.activation,
-              token_device: this.tmpTokenDevice,
               type: this.editedItem.type,
               type_value: this.editedItem.value,
               telemetry: this.editedItem.telemetry
@@ -976,10 +1000,11 @@ export default {
                     repeat: "",
                     set_time: this.editedItem.time,
                     activation: this.editedItem.activation,
-                    token_device: this.tmpTokenDevice,
                     type: this.editedItem.type,
                     type_value: this.editedItem.value,
-                    telemetry: this.editedItem.telemetry
+                    telemetry: this.editedItem.telemetry,
+                    username: this.user.username,
+                    password: this.user.password
                   },
                   {
                     headers: {
@@ -996,7 +1021,7 @@ export default {
                   }
                 })
                 .catch(err => {
-                  if(err) {
+                  if (err) {
                     this.loadingApi = false;
                     this.error = "Can't connect to the server";
                   }
@@ -1004,25 +1029,26 @@ export default {
             }
           })
           .catch(err => {
-            if(err) {
+            if (err) {
               this.loadingApi = false;
               this.error = "Can't connect to the server";
             }
           });
       } else if (this.editedItem.category === "weekly") {
+        let userTB = jwt.decode(this.$cookies.get("token").token);
         this.loadingApi = true;
         this.$http
           .post(
             `${URL}/post/scheduler`,
             {
               device_id: this.editedItem.device,
+              userId: userTB.userId,
               device_name: this.deviceName,
               scheduler_name: this.editedItem.name,
               category: this.editedItem.category,
               repeat: this.editedItem.day.toString(),
               set_time: this.editedItem.time,
               activation: this.editedItem.activation,
-              token_device: this.tmpTokenDevice,
               type: this.editedItem.type,
               type_value: this.editedItem.value,
               telemetry: this.editedItem.telemetry
@@ -1047,10 +1073,11 @@ export default {
                     repeat: this.editedItem.day.toString(),
                     set_time: this.editedItem.time,
                     activation: this.editedItem.activation,
-                    token_device: this.tmpTokenDevice,
                     type: this.editedItem.type,
                     type_value: this.editedItem.value,
-                    telemetry: this.editedItem.telemetry
+                    telemetry: this.editedItem.telemetry,
+                    username: this.user.username,
+                    password: this.user.password
                   },
                   {
                     headers: {
@@ -1067,7 +1094,7 @@ export default {
                   }
                 })
                 .catch(err => {
-                  if(err) {
+                  if (err) {
                     this.loadingApi = false;
                     this.error = "Can't connect to the server";
                   }
@@ -1075,7 +1102,7 @@ export default {
             }
           })
           .catch(err => {
-            if(err) {
+            if (err) {
               this.loadingApi = false;
               this.error = "Can't connect to the server";
             }
@@ -1083,19 +1110,20 @@ export default {
         this.error = "";
         this.close();
       } else if (this.editedItem.category === "monthly") {
+        let userTB = jwt.decode(this.$cookies.get("token").token);
         this.loadingApi = true;
         this.$http
           .post(
             `${URL}/post/scheduler`,
             {
               device_id: this.editedItem.device,
+              userId: userTB.userId,
               device_name: this.deviceName,
               scheduler_name: this.editedItem.name,
               category: this.editedItem.category,
               repeat: this.editedItem.date,
               set_time: this.editedItem.time,
               activation: this.editedItem.activation,
-              token_device: this.tmpTokenDevice,
               type: this.editedItem.type,
               type_value: this.editedItem.value,
               telemetry: this.editedItem.telemetry
@@ -1120,10 +1148,11 @@ export default {
                     repeat: this.editedItem.date,
                     set_time: this.editedItem.time,
                     activation: this.editedItem.activation,
-                    token_device: this.tmpTokenDevice,
                     type: this.editedItem.type,
                     type_value: this.editedItem.value,
-                    telemetry: this.editedItem.telemetry
+                    telemetry: this.editedItem.telemetry,
+                    username: this.user.username,
+                    password: this.user.password
                   },
                   {
                     headers: {
@@ -1140,7 +1169,7 @@ export default {
                   }
                 })
                 .catch(err => {
-                  if(err) {
+                  if (err) {
                     this.loadingApi = false;
                     this.error = "Can't connect to the server";
                   }

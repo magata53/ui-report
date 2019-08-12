@@ -55,6 +55,7 @@ export default {
   data() {
     return {
       loading: false,
+      error: "",
       form: {
         username: "",
         password: ""
@@ -82,10 +83,11 @@ export default {
           this.$cookies.set("token", res.data);
           this.form = Object.assign({}, this.defaultLogin);
           this.loading = false;
+          this.error = "";
           this.$router.push({ path: "/reports" });
         })
         .catch(err => {
-          if (err.response.status === 401) {
+          if (err.status === 401) {
             this.loading = false;
             this.error = "Username or password wrong";
           } else {

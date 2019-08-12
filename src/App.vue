@@ -8,17 +8,16 @@
 
 <script>
 export default {
-  name: 'App',
-  data () {
+  name: "App",
+  data() {
     return {
       //
-
-    }
+    };
   },
   computed: {
     layout() {
-    return (this.$route.meta.layout || "layout")
+      return this.$route.meta.layout || "layout";
+    }
   }
-  }
-}
+};
 </script>

@@ -1,6 +1,6 @@
 <template>
   <v-layout align-center justify-center fill-height column max-width="100%">
-     <!-- Dialog loading for wait response from API -->
+    <!-- Dialog loading for wait response from API -->
     <v-dialog v-model="loadingApi" hide-overlay persistent width="300">
       <v-card color="primary" dark>
         <v-card-text>
@@ -11,235 +11,246 @@
     </v-dialog>
 
     <div>
-    <!-- Judul table Rules -->
-    <v-toolbar>
-      <v-toolbar-title>List Of Rules</v-toolbar-title>
-      <v-divider class="mx-2" inset vertical></v-divider>
-      <v-spacer></v-spacer>
+      <!-- Judul table Rules -->
+      <v-toolbar>
+        <v-toolbar-title>List Of Rules</v-toolbar-title>
+        <v-divider class="mx-2" inset vertical></v-divider>
+        <v-spacer></v-spacer>
 
-      <!-- Dialog buat baru dan edit scheduler -->
-      <v-dialog v-model="dialog" persistent max-width="700">
-        <!-- Tombol buat baru -->
-        <template v-slot:activator="{ on }">
-          <v-btn color="primary" dark class="mb-2" v-on="on">Create</v-btn>
+        <!-- Dialog buat baru dan edit scheduler -->
+        <v-dialog v-model="dialog" persistent max-width="700">
+          <!-- Tombol buat baru -->
+          <template v-slot:activator="{ on }">
+            <v-btn color="primary" dark class="mb-2" v-on="on">Create</v-btn>
+          </template>
+
+          <!-- Isi Dialog -->
+          <v-card>
+            <!-- Judul Dialog -->
+            <v-card-title>
+              <span class="headline">{{ formTitle }}</span>
+            </v-card-title>
+
+            <!-- Body dialog berisi form untuk create -->
+            <v-card-text>
+              <v-container grid-list-md v-if="method === 'New'">
+                <v-layout align-center justify-center v-if="error">
+                  <p class="error--text">{{error}}</p>
+                </v-layout>
+                <v-layout wrap>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Customer</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-select
+                          v-model="editedItem.customer"
+                          :items="listCustomer"
+                          item-text="name"
+                          item-value="id"
+                          @change="onChangeCustomer"
+                        ></v-select>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12 v-if="editedItem.customer">
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Device</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-select
+                          v-model="editedItem.device"
+                          :items="listDevice"
+                          item-text="name"
+                          item-value="id"
+                          @change="onChangeDevice"
+                        ></v-select>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12 v-if="editedItem.device">
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Telemetry</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-select v-model="editedItem.telemetry" :items="listTelemetry"></v-select>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Min</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-text-field v-model="editedItem.min" type="number"></v-text-field>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Max</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-text-field v-model="editedItem.max" type="number"></v-text-field>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Status</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-select
+                          v-model="editedItem.status"
+                          :items="listStatus"
+                          item-text="name"
+                          item-value="id"
+                        ></v-select>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+
+              <!-- Body dialog berisi form untuk edit -->
+              <v-container grid-list-md v-else-if="method === 'Edit'">
+                <v-layout align-center justify-center v-if="error">
+                  <p class="error--text">{{error}}</p>
+                </v-layout>
+                <v-layout wrap>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Min</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-text-field v-model="editedItem.min" type="number"></v-text-field>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Max</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-text-field v-model="editedItem.max" type="number"></v-text-field>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4 align-self-center>Status</v-flex>
+                      <v-flex xs2 align-self-center>:</v-flex>
+                      <v-flex xs4>
+                        <v-select
+                          v-model="editedItem.status"
+                          :items="listStatus"
+                          item-text="name"
+                          item-value="id"
+                        ></v-select>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+
+              <!-- Body untuk detail -->
+              <v-container grid-list-md v-else>
+                <v-layout wrap>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4>Device</v-flex>
+                      <v-flex xs2>:</v-flex>
+                      <v-flex xs6>{{editedItem.device}}</v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4>Telemetry</v-flex>
+                      <v-flex xs2>:</v-flex>
+                      <v-flex xs4>{{editedItem.telemetry}}</v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4>Min</v-flex>
+                      <v-flex xs2>:</v-flex>
+                      <v-flex xs4>{{editedItem.min}}</v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4>Max</v-flex>
+                      <v-flex xs2>:</v-flex>
+                      <v-flex xs4>{{editedItem.max}}</v-flex>
+                    </v-layout>
+                  </v-flex>
+                  <v-flex xs12>
+                    <v-layout>
+                      <v-flex xs4>Status</v-flex>
+                      <v-flex xs2>:</v-flex>
+                      <v-flex xs4>
+                        <span class="green--text" v-if="editedItem.status === 3">normal</span>
+                        <span class="yellow--text" v-else-if="editedItem.status === 2">minor</span>
+                        <span class="red--text" v-else>major</span>
+                      </v-flex>
+                    </v-layout>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-card-text>
+
+            <!-- Button action edit, buat, cancel, ok -->
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="blue darken-1"
+                flat
+                @click="close"
+                v-if="method === 'Edit' || method === 'New'"
+              >Cancel</v-btn>
+              <v-btn
+                color="blue darken-1"
+                flat
+                @click="save"
+                v-if="method === 'Edit' || method === 'New'"
+              >Save</v-btn>
+              <v-btn color="blue darken-1" flat @click="close1" v-else>OK</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-toolbar>
+
+      <!-- Tabel daftar scheduler -->
+      <v-data-table
+        :headers="headers"
+        :items="items"
+        :loading="loading"
+        class="elevation-1"
+        :rows-per-page-items="[15,30,50,{'text':'$vuetify.dataIterator.rowsPerPageAll','value':-1}]"
+      >
+        <template v-slot:items="props">
+          <td class="text-xs-left">{{ props.index + 1}}</td>
+          <td class="text-xs-left">{{ props.item.telemetry }}</td>
+          <td class="text-xs-left">{{ props.item.max }}</td>
+          <td class="text-xs-left">{{ props.item.min }}</td>
+          <td class="text-xs-left">
+            <span class="green--text" v-if="props.item.status === 3">normal</span>
+            <span class="yellow--text" v-else-if="props.item.status === 2">minor</span>
+            <span class="red--text" v-else>major</span>
+          </td>
+          <td class="text-xs-left">
+            <v-icon class="mr-2" @click="detailItem(props.item)" color="primary">info</v-icon>
+            <v-icon class="mr-2" @click="editItem(props.item)" color="success">edit</v-icon>
+            <v-icon @click="deleteItem(props.item)" color="error">delete</v-icon>
+          </td>
         </template>
-
-        <!-- Isi Dialog -->
-        <v-card>
-          <!-- Judul Dialog -->
-          <v-card-title>
-            <span class="headline">{{ formTitle }}</span>
-          </v-card-title>
-
-          <!-- Body dialog berisi form untuk create -->
-          <v-card-text>
-            <v-container grid-list-md v-if="method === 'New'">
-              <v-layout align-center justify-center v-if="error">
-                <p class="error--text">{{error}}</p>
-              </v-layout>
-              <v-layout wrap>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Customer</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-select
-                        v-model="editedItem.customer"
-                        :items="listCustomer"
-                        item-text="name"
-                        item-value="id"
-                        @change="onChangeCustomer"
-                      ></v-select>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12 v-if="editedItem.customer">
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Device</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-select
-                        v-model="editedItem.device"
-                        :items="listDevice"
-                        item-text="name"
-                        item-value="id"
-                        @change="onChangeDevice"
-                      ></v-select>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12 v-if="editedItem.device">
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Telemetry</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-select v-model="editedItem.telemetry" :items="listTelemetry"></v-select>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Min</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-text-field v-model="editedItem.min" type="number"></v-text-field>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Max</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-text-field v-model="editedItem.max" type="number"></v-text-field>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Status</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-select v-model="editedItem.status" :items="listStatus" item-text="name" item-value="id"></v-select>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-              </v-layout>
-            </v-container>
-
-          <!-- Body dialog berisi form untuk edit -->
-            <v-container grid-list-md v-else-if="method === 'Edit'">
-              <v-layout align-center justify-center v-if="error">
-                <p class="error--text">{{error}}</p>
-              </v-layout>
-              <v-layout wrap>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Min</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-text-field v-model="editedItem.min" type="number"></v-text-field>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Max</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-text-field v-model="editedItem.max" type="number"></v-text-field>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4 align-self-center>Status</v-flex>
-                    <v-flex xs2 align-self-center>:</v-flex>
-                    <v-flex xs4>
-                      <v-select v-model="editedItem.status" :items="listStatus" item-text="name" item-value="id"></v-select>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-              </v-layout>
-            </v-container>
-
-            <!-- Body untuk detail -->
-            <v-container grid-list-md v-else>
-              <v-layout wrap>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4>Device</v-flex>
-                    <v-flex xs2>:</v-flex>
-                    <v-flex xs6>{{editedItem.device}}</v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4>Telemetry</v-flex>
-                    <v-flex xs2>:</v-flex>
-                    <v-flex xs4>{{editedItem.telemetry}}</v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4>Min</v-flex>
-                    <v-flex xs2>:</v-flex>
-                    <v-flex xs4>{{editedItem.min}}</v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4>Max</v-flex>
-                    <v-flex xs2>:</v-flex>
-                    <v-flex xs4>{{editedItem.max}}</v-flex>
-                  </v-layout>
-                </v-flex>
-                <v-flex xs12>
-                  <v-layout>
-                    <v-flex xs4>Status</v-flex>
-                    <v-flex xs2>:</v-flex>
-                    <v-flex xs4>
-                      <span class="green--text" v-if="editedItem.status === 3">normal</span>
-                      <span class="yellow--text" v-else-if="editedItem.status === 2">minor</span>
-                      <span class="red--text" v-else>major</span>
-                    </v-flex>
-                  </v-layout>
-                </v-flex>
-              </v-layout>
-            </v-container>
-          </v-card-text>
-
-          <!-- Button action edit, buat, cancel, ok -->
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="blue darken-1"
-              flat
-              @click="close"
-              v-if="method === 'Edit' || method === 'New'"
-            >Cancel</v-btn>
-            <v-btn
-              color="blue darken-1"
-              flat
-              @click="save"
-              v-if="method === 'Edit' || method === 'New'"
-            >Save</v-btn>
-            <v-btn color="blue darken-1" flat @click="close1" v-else>OK</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-toolbar>
-
-    <!-- Tabel daftar scheduler -->
-    <v-data-table
-      :headers="headers"
-      :items="items"
-      :loading="loading"
-      class="elevation-1"
-      :rows-per-page-items="[15,30,50,{'text':'$vuetify.dataIterator.rowsPerPageAll','value':-1}]"
-    >
-      <template v-slot:items="props">
-        <td class="text-xs-left">{{ props.index + 1}}</td>
-        <td class="text-xs-left">{{ props.item.telemetry }}</td>
-        <td class="text-xs-left">{{ props.item.max }}</td>
-        <td class="text-xs-left">{{ props.item.min }}</td>
-        <td class="text-xs-left">
-          <span class="green--text" v-if="props.item.status === 3">normal</span>
-          <span class="yellow--text" v-else-if="props.item.status === 2">minor</span>
-          <span class="red--text" v-else>major</span>
-        </td>
-        <td class="text-xs-left">
-          <v-icon class="mr-2" @click="detailItem(props.item)" color="primary">info</v-icon>
-          <v-icon class="mr-2" @click="editItem(props.item)" color="success">edit</v-icon>
-          <v-icon @click="deleteItem(props.item)" color="error">delete</v-icon>
-        </td>
-      </template>
-    </v-data-table>
+      </v-data-table>
     </div>
   </v-layout>
 </template>
 
 <script>
+const jwt = require("jsonwebtoken");
 const URL = `http://${window.location.host}:5005/api`;
 export default {
   name: "rules",
@@ -261,9 +272,9 @@ export default {
       { text: "Actions", value: "telemetry", sortable: false }
     ],
     items: [],
-    listTelemetry: [{ text: "Select", value: null },],
-    listCustomer: [{ name: "Select", id: null },],
-    listDevice: [{ name: "Select", id: null },],
+    listTelemetry: [{ text: "Select", value: null }],
+    listCustomer: [{ name: "Select", id: null }],
+    listDevice: [{ name: "Select", id: null }],
     editedIndex: -1,
     editedItem: {
       customer: null,
@@ -281,7 +292,7 @@ export default {
       min: 0,
       status: null
     },
-    listStatus: [{ name: "Select", id: null },]
+    listStatus: [{ name: "Select", id: null }]
   }),
 
   computed: {
@@ -289,7 +300,7 @@ export default {
       return this.editedIndex === -1
         ? "Create New Rules "
         : `${this.method} ${this.editedItem.telemetry}`;
-    },
+    }
   },
 
   watch: {
@@ -299,6 +310,26 @@ export default {
   },
 
   mounted() {
+    let userTB = jwt.decode(this.$cookies.get("token"));
+    this.$http
+      .get(
+        `http://${window.location.host}:8080/api/user/${userTB.userId}/token`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Authorization": `Bearer ${this.$cookies.get("token")}`
+          }
+        }
+      )
+      .then(res => {
+        this.$cookies.set("token", res.data.token);
+      })
+      .catch(err => {
+        if (err) {
+          this.error = "Re-login again";
+        }
+      });
+
     this.loading = true;
 
     this.getStatus();
@@ -333,7 +364,7 @@ export default {
         });
     },
     getDevice(val) {
-      this.listDevice = [{name: "Select", id: null},]
+      this.listDevice = [{ name: "Select", id: null }];
       this.editedItem.device = null;
       this.loadingApi = true;
       this.$http
@@ -360,13 +391,17 @@ export default {
         });
     },
     getTelemetry(val) {
-      this.listTelemetry = [{text: "Select", value: null},]
+      this.listTelemetry = [{ text: "Select", value: null }];
       this.editedItem.telemetry = null;
       this.loadingApi = true;
       this.$http
         .post(
           `${URL}/get/report/attributes`,
-          { entityId: val, token: "Bearer " + this.$cookies.get("token"), entityType: "DEVICE" },
+          {
+            entityId: val,
+            token: "Bearer " + this.$cookies.get("token"),
+            entityType: "DEVICE"
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -387,7 +422,8 @@ export default {
         });
     },
     getStatus() {
-      this.$http.get(`${URL}/get/rule/status`)
+      this.$http
+        .get(`${URL}/get/rule/status`)
         .then(res => {
           for (let l = 0; l < res.data.length; l++) {
             this.listStatus.push(res.data[l]);
@@ -400,31 +436,32 @@ export default {
         });
     },
     getRules() {
-      this.items = []
-      this.$http.get(`${URL}/get/rule`)
-      .then(res => {
-        for(let y = 0; y < res.data.length; y++) {
-          this.items.push({
-            id: res.data[y].id,
-            device: res.data[y].device_id,
-            telemetry: res.data[y].variable,
-            max: res.data[y].max,
-            min: res.data[y].min,
-            status: res.data[y].relations[0].status_id
-          })
-        }
-      })
-      .catch(err => {
-        if (err) {
+      this.items = [];
+      this.$http
+        .get(`${URL}/get/rule`)
+        .then(res => {
+          for (let y = 0; y < res.data.length; y++) {
+            this.items.push({
+              id: res.data[y].id,
+              device: res.data[y].device_id,
+              telemetry: res.data[y].variable,
+              max: res.data[y].max,
+              min: res.data[y].min,
+              status: res.data[y].relations[0].status_id
+            });
+          }
+        })
+        .catch(err => {
+          if (err) {
             this.error = "Can't connect to the server";
           }
-      })
+        });
     },
     onChangeCustomer(val) {
       this.getDevice(val);
     },
     onChangeDevice(val) {
-      this.getTelemetry(val)
+      this.getTelemetry(val);
     },
     editItem(item) {
       this.method = "Edit";
@@ -441,17 +478,18 @@ export default {
     deleteItem(item) {
       const index = this.items.indexOf(item);
       confirm("Are you sure you want to delete this item?") &&
-        this.$http.delete(`${URL}/delete/rule/${item.id}`)
-        .then(res => {
-          if(res.status === 200) {
-            this.items.splice(index, 1);
-          }
-        })
-        .catch(err => {
-          if(err) {
-            this.error = "Can't connect to the server"
-          }
-        })
+        this.$http
+          .delete(`${URL}/delete/rule/${item.id}`)
+          .then(res => {
+            if (res.status === 200) {
+              this.items.splice(index, 1);
+            }
+          })
+          .catch(err => {
+            if (err) {
+              this.error = "Can't connect to the server";
+            }
+          });
     },
     close() {
       this.dialog = false;
@@ -488,60 +526,68 @@ export default {
         this.error = "Must select the status";
       } else if (this.editedIndex > -1) {
         this.loadingApi = true;
-        this.$http.patch(`${URL}/patch/rule/${this.editedItem.id}`, {
-          device_id: this.editedItem.device,
-          variable: this.editedItem.telemetry,
-          max: this.editedItem.max,
-          min: this.editedItem.min,
-          status: this.editedItem.status
-        }, {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-        .then(res => {
-          if(res.status === 200) {
-            Object.assign(this.items[this.editedIndex], this.editedItem);
-            this.loadingApi = false;
-            this.error = ""
-            this.close();
-          }
-        })
-        .catch(err => {
-          if(err) {
-            this.loadingApi = false;
-            this.error = "Can't connect to the server"
-          }
-        })
-        
+        this.$http
+          .patch(
+            `${URL}/patch/rule/${this.editedItem.id}`,
+            {
+              device_id: this.editedItem.device,
+              variable: this.editedItem.telemetry,
+              max: this.editedItem.max,
+              min: this.editedItem.min,
+              status: this.editedItem.status
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(res => {
+            if (res.status === 200) {
+              Object.assign(this.items[this.editedIndex], this.editedItem);
+              this.loadingApi = false;
+              this.error = "";
+              this.close();
+            }
+          })
+          .catch(err => {
+            if (err) {
+              this.loadingApi = false;
+              this.error = "Can't connect to the server";
+            }
+          });
       } else {
-        this.loadingApi = true
-        this.$http.post(`${URL}/post/rule`, {
-          device_id: this.editedItem.device,
-          variable: this.editedItem.telemetry,
-          max: this.editedItem.max,
-          min: this.editedItem.min,
-          status: this.editedItem.status
-        }, {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-        .then(res => {
-          if(res.status === 200) {
-            this.getRules();
-            this.loadingApi = false;
-            this.error = "";
-            this.close();
-          }
-        })
-        .catch(err => {
-          if (err) {
-            this.loadingApi = false;
-            this.error = "Can't connect to the server";
-          }
-        })
-        
+        this.loadingApi = true;
+        this.$http
+          .post(
+            `${URL}/post/rule`,
+            {
+              device_id: this.editedItem.device,
+              variable: this.editedItem.telemetry,
+              max: this.editedItem.max,
+              min: this.editedItem.min,
+              status: this.editedItem.status
+            },
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
+          .then(res => {
+            if (res.status === 200) {
+              this.getRules();
+              this.loadingApi = false;
+              this.error = "";
+              this.close();
+            }
+          })
+          .catch(err => {
+            if (err) {
+              this.loadingApi = false;
+              this.error = "Can't connect to the server";
+            }
+          });
       }
     }
   }

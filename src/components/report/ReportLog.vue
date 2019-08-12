@@ -360,7 +360,7 @@ export default {
       this.$http
         .post(
           `${URL}/customerList`,
-          { token: "Bearer " + this.$cookies.get("token") },
+          { token: "Bearer " + this.$cookies.get("token").token },
           {
             headers: {
               "Content-Type": "application/json"
@@ -379,13 +379,16 @@ export default {
         });
     },
     getDevice(val) {
-      this.listDevice = [{name: "Select", id: null},]
+      this.listDevice = [{ name: "Select", id: null }];
       this.form.device = null;
       this.loading = true;
       this.$http
         .post(
           `${URL}/customerDevices`,
-          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            customer: val,
+            token: "Bearer " + this.$cookies.get("token").token
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -406,13 +409,16 @@ export default {
         });
     },
     getAsset(val) {
-      this.listAsset = [{name: "Select", id: null},]
+      this.listAsset = [{ name: "Select", id: null }];
       this.form.asset = null;
       this.loading = true;
       this.$http
         .post(
           `${URL}/customerAssets`,
-          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            customer: val,
+            token: "Bearer " + this.$cookies.get("token").token
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -433,13 +439,16 @@ export default {
         });
     },
     getEntityView(val) {
-      this.listEntityView = [{name: "Select", id: null},]
+      this.listEntityView = [{ name: "Select", id: null }];
       this.form.entityView = null;
       this.loading = true;
       this.$http
         .post(
           `${URL}/customerEntityView`,
-          { customer: val, token: "Bearer " + this.$cookies.get("token") },
+          {
+            customer: val,
+            token: "Bearer " + this.$cookies.get("token").token
+          },
           {
             headers: {
               "Content-Type": "application/json"
@@ -467,7 +476,7 @@ export default {
           {
             entityType: entityType,
             entityId: val,
-            token: "Bearer " + this.$cookies.get("token")
+            token: "Bearer " + this.$cookies.get("token").token
           },
           {
             headers: {
@@ -561,7 +570,7 @@ export default {
           agg: this.form.agg,
           limit: this.form.limit,
           interval: parseInt(this.form.interval) * MILLISECONDS_TO_MINUTES,
-          token: "Bearer " + this.$cookies.get("token")
+          token: "Bearer " + this.$cookies.get("token").token
         };
         this.$http
           .post(`${URL}/excel`, body, {
